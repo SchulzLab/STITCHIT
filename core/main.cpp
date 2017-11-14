@@ -30,7 +30,7 @@ int main(int argc, char *argv[]){
           //Loading genome size file
 	GenomeSizeReader gsr(genomeSizeFile);
 	gsr.loadGenomeSizeFile();
-	std::map<std::string,unsigned int> genomeSize;
+	std::map<std::string,int> genomeSize;
 	genomeSize = gsr.getGenomeSize();
 
           //Reading the annotation file to retrieve gene coordinates

@@ -10,14 +10,14 @@ class GenomeSizeReader{
 	public:
 	GenomeSizeReader(const std::string& filename);
 	void loadGenomeSizeFile();
-	std::map<std::string,unsigned int>& getGenomeSize();
+	std::map<std::string,int>& getGenomeSize();
 	const std::string& getFilename();	
 
           friend std::ostream& operator<<(std::ostream& os,const GenomeSizeReader& r);
 
 	private:	
 	const std::string filename_;
-	std::map<std::string,unsigned int> genomeSize_;
+	std::map<std::string,int> genomeSize_;
 };
 
 #endif

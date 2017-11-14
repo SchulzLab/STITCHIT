@@ -4,6 +4,7 @@
 GenomeSizeReader::GenomeSizeReader(const std::string& filename)
 	:filename_(filename)
 {
+	genomeSize_.clear();
 }
 
 /*! \brief Brief description.
@@ -20,7 +21,7 @@ void GenomeSizeReader::loadGenomeSizeFile(){
           std::string chromosome;
 	genomeSize_.clear();
           genomeSizeFile.open(filename_);
-          if (!genomeSizeFile) throw std::invalid_argument("Genome size file "+filename_+" is not properly formatted.");
+          if (!genomeSizeFile) throw std::invalid_argument("Genome size file "+filename_+" does not exist.");
 
           while (!genomeSizeFile.eof()){
                     std::getline(genomeSizeFile,temp);
@@ -36,7 +37,7 @@ void GenomeSizeReader::loadGenomeSizeFile(){
           genomeSizeFile.close();
 }
 
-std::map<std::string,unsigned int>& GenomeSizeReader::getGenomeSize(){
+std::map<std::string, int>& GenomeSizeReader::getGenomeSize(){
 	return genomeSize_;
 }
 

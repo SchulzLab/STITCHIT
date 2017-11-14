@@ -1,10 +1,11 @@
 #include "GTFReader.h"
 
-GTFReader::GTFReader(const std::string& gtfFileName, std::map<std::string, unsigned int>& genomeSize, const unsigned int& window)
+GTFReader::GTFReader(const std::string& gtfFileName, std::map<std::string, int>& genomeSize, const int& window)
 	:gtfFileName_(gtfFileName),
           genomeSize_(genomeSize),                                                                                                                                                                                                             
           window_(window)
 {
+	genomicLocation_= std::make_tuple("chr0",0,0);
 }
 
 /*! \brief Brief description.
@@ -14,10 +15,10 @@ GTFReader::GTFReader(const std::string& gtfFileName, std::map<std::string, unsig
  * @throw
  */
 void GTFReader::findGenomicLocation(const std::string& targetGeneID){
-	unsigned int pos1, pos2;
+	int pos1, pos2;
 	std::string chromosome, buf, temp, convertedGeneID, geneID;
 	std::ifstream annotationFile;
-	const unsigned int zero = 0;
+	const int zero = 0;
 	annotationFile.open(gtfFileName_);
 	if (!annotationFile) throw std::invalid_argument("Gene annotation file "+gtfFileName_+" could not be loaded");
 	
@@ -64,9 +65,14 @@ const std::tuple<std::string,unsigned int, unsigned int>& GTFReader::getGenomicL
 	return genomicLocation_;
 };
 
-const unsigned int& GTFReader::getWindow(){
+const int& GTFReader::getWindow(){
 	return window_;
 };
+
+void GTFReader::setWindow(int window){
+	window_ = window;
+};
+
 
 std::ostream& operator<<(std::ostream& os, const GTFReader& r){
 	os << std::get<0>(r.genomicLocation_) << " " << std::get<1>(r.genomicLocation_) << " " << std::get<2>(r.genomicLocation_) <<std::endl;
