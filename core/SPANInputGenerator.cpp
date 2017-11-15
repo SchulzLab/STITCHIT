@@ -5,6 +5,8 @@ SPANInputGenerator::SPANInputGenerator(const std::string& path, std::map<std::st
 	:path_(path),
 	expressionMap_(expressionMap)
 {
+	sampleNames_.clear();
+	inputMatrix_.clear();
 }
 
 /*! \brief Brief description.
@@ -38,16 +40,21 @@ void SPANInputGenerator::printIntervals(bwOverlappingIntervals_t *ints, uint32_t
  */
 std::vector<double> SPANInputGenerator::parseIntervals(bwOverlappingIntervals_t *ints, uint32_t start, unsigned int exp, const unsigned int size) {
           std::vector<double> temp;
+	double tempV;
           temp.reserve(size+1);
           uint32_t i;
-          if(!ints) throw std::invalid_argument("Error in the provided genomic intervals");
+          if(!ints) throw std::invalid_argument("Error in retrieving counts from bw files");
           for(i=0; i<ints->l; i++) {
+		if (isnan(ints->value[i])){
+			tempV=0;
+		} else tempV=ints->value[i];
+
                     if(ints->start && ints->end) {
-                              temp.push_back(ints->value[i]);
+                              temp.push_back(tempV);
                     } else if(ints->start) {
-                              temp.push_back(ints->value[i]);
+                              temp.push_back(tempV);
                     } else {
-                              temp.push_back(ints->value[i]);
+                              temp.push_back(tempV);
                     }
           }
           return temp;
@@ -74,7 +81,9 @@ void SPANInputGenerator::generateSPANInput(const std::tuple<std::string, unsigne
                               char * filename= new char[filenameS.size() +1];
                               std::copy(filenameS.begin(),filenameS.end(), filename);
                               filename[filenameS.size()]='\0';
-
+			if (entry.path().extension().string() != ".bw"){
+				throw std::invalid_argument(filenameS+" is not a biwWig file. Expected file type is .bw");
+			}
                               //Check for presence of expression data for the current sample, otherwise ignore the sample!
                               if (expressionMap_.find(entry.path().stem().string()) != expressionMap_.end()){
 				sampleNames_.push_back(entry.path().stem().string());
@@ -94,7 +103,7 @@ void SPANInputGenerator::generateSPANInput(const std::tuple<std::string, unsigne
                                         bwCleanup();
                                         inputMatrix_.push_back(currentVec);
                               }else{
-                                        std::cerr<<"No expression information available for "<<filenameS<<std::endl;
+                                        throw std::invalid_argument("No expression information available for "+filenameS);
                               }
                     }
           }else{
