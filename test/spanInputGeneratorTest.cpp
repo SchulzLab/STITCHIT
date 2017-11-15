@@ -10,7 +10,7 @@ class SPANInputGeneratorTest : public ::testing::Test{
 	{
 		exp_.loadExpressionData("ENSG00000184990");
 		coordinates_=std::make_tuple("chr3",10,40);
-		coordinatesOOR_=std::make_tuple("chr13",10,40);
+		coordinatesOOR_=std::make_tuple("chr3",1000,1030);
 	}
 
 	void virtual SetUp(){
@@ -143,7 +143,7 @@ TEST_F(SPANInputGeneratorTest, CorrectColumnCountsOfEachRowInInputMatrix_OOR){
 
 TEST_F(SPANInputGeneratorTest, CorrectOutputSample_B_S00CWT11_OOR){
 	SPANInputGenerator sig (TEST_DATA_PATH("BigWigFiles/"),exp_.getExpressionMap());
-	sig.generateSPANInput(coordinates_);
+	sig.generateSPANInput(coordinatesOOR_);
 	std::vector<std::string> sampleNames = sig.getSampleNames();
 	std::vector<std::vector<double>> inputMatrix =sig.getInputMatrix();
 	std::vector<double> dataVector={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
