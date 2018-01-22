@@ -1,4 +1,4 @@
-project(LinkingEnhancerToGenesBigWig C)
+project(STITCHBigWig C)
 
 add_library(BigWig
 	io.c

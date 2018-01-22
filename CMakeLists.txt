@@ -4,7 +4,7 @@ if(POLICY CMP0054)
 	cmake_policy(SET CMP0054 NEW)
 endif()
 
-project(LinkingEnhancertoGenes C CXX)
+project(STITCH C CXX)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -24,6 +24,8 @@ add_subdirectory("${CMAKE_BINARY_DIR}/googletest-src"
 add_subdirectory(BigWig)
 
 add_subdirectory(core)
+
+add_subdirectory(SPAN)
 
 enable_testing()
 add_subdirectory(test)

@@ -1,6 +1,5 @@
 #include "SPANInputGenerator.h"
 
-
 SPANInputGenerator::SPANInputGenerator(const std::string& path, std::map<std::string, unsigned int> expressionMap)
 	:path_(path),
 	expressionMap_(expressionMap)

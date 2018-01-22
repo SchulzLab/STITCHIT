@@ -1,4 +1,4 @@
-project(LEGTest CXX)
+project(STITCHTest CXX)
 
 include(LEGTest.cmake)
 
@@ -11,3 +11,5 @@ add_test_case(runGTFReaderTests gtfReaderTest.cpp)
 add_test_case(runExpressionReaderTests expressionReaderTest.cpp)
 
 add_test_case(runSPANInputGeneratorTests spanInputGeneratorTest.cpp)
+
+add_test_case(runDataTests dataTest.cpp)

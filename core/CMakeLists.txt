@@ -1,4 +1,4 @@
-project (LinkingEnhancerToGenesCore CXX)
+project (STITCHCore CXX)
 
 add_executable (LEG main.cpp GenomeSizeReader.cpp ExpressionReader.cpp GTFReader.cpp SPANInputGenerator.cpp)
 
