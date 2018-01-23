@@ -30,6 +30,10 @@ double& Data::getElement(unsigned int row,unsigned int col){
 	return data[row][col];
 }
 
+std::vector<double>& Data::getRow(unsigned int row){
+	return data[row];
+}
+
 void Data::setData(std::vector<std::vector<double> > input, bool binaryClassifierInLastRow, bool comulat, char meth, int s,  bool ignoreLabel){
 	commulative = comulat;
 	method = meth;
@@ -39,6 +43,24 @@ void Data::setData(std::vector<std::vector<double> > input, bool binaryClassifie
 	logbase = log(2);
 	resolution = 10;
 	data=input;
+
+	m = data.size();
+	n = data[0].size();
+	
+	min = std::numeric_limits<double>::max();
+	max = -min;
+	for(int i = 0; i < n; i++){
+		for(int j = 0; j < m; j++){
+			double v = data[j][i];
+			if(v < min){
+				min = v;
+				}
+			if(v > max){
+				max = v;
+				}
+		}
+	}
+	resolution = 10;
 }
 
 

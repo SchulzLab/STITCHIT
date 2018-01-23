@@ -6,6 +6,6 @@ endfunction()
 
 function(add_test_case EXECUTABLE_NAME SRC_NAME)
 	add_executable(${EXECUTABLE_NAME} ${SRC_NAME})
-	target_link_libraries(${EXECUTABLE_NAME} BigWig ${Boost_LIBRARIES} gtest gtest_main)
+	target_link_libraries(${EXECUTABLE_NAME} BigWig ${Boost_LIBRARIES}  gtest gtest_main -fopenmp)
 	add_test(NAME ${EXECUTABLE_NAME} COMMAND ${EXECUTABLE_NAME})
 endfunction()

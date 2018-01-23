@@ -117,7 +117,7 @@ public:
     unsigned int getColCount();
     void setData(std::vector<std::vector<double> > input, bool binaryClassifierInLastRow, bool comulat, char meth, int s,  bool ignoreLabel);
     double& getElement(unsigned int row,unsigned int col);
-
+    std::vector<double>& getRow(unsigned int row);
 protected:
     int stepSize;
     double GaussApprox(int,int,Fraction*);

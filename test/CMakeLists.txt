@@ -13,3 +13,5 @@ add_test_case(runExpressionReaderTests expressionReaderTest.cpp)
 add_test_case(runSPANInputGeneratorTests spanInputGeneratorTest.cpp)
 
 add_test_case(runDataTests dataTest.cpp)
+
+add_test_case(runSPANTests spanTest.cpp)
