@@ -26,7 +26,7 @@ void SPANInputGenerator::printIntervals(bwOverlappingIntervals_t *ints, uint32_t
                               printf("%f\t",ints->value[i]);
                     }
           }
-          printf("%f\t",exp);
+          printf("%u\t",exp);
           printf("\n");
 }
 
@@ -127,4 +127,5 @@ std::ostream& operator<<(std::ostream& os, const SPANInputGenerator& r){
 		}
 		os<<std::endl;
 	}
+	return os;
 }

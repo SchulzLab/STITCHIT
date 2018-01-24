@@ -4,10 +4,7 @@
 std::vector<std::pair<unsigned int, unsigned int> > SPAN::runSpan(Data& d, int s = 1, unsigned int maxCores = 1){
     int k = 0;
     bool useClasses = true;
-    bool useCRE = false;
-    char method = 'g';
     bool verbose = false;
-    bool ignoreLabel = false;
     int parts = 1;
     
     //S::costfunptr ptr;
@@ -50,13 +47,13 @@ std::vector<std::pair<unsigned int, unsigned int> > SPAN::runSpan(Data& d, int s
 	std::cout<<"Second layer filled with "<<second_layer.size()<<std::endl;
 	// algorithmus ausführen
 	#pragma omp parallel for
-	for(int i = 0; i < second_layer.size(); i++){
+	for(unsigned int i = 0; i < second_layer.size(); i++){
 		bins.runSPAN(k, second_layer[i]);
 	}
 
 	std::cout<<"Merging results of second layer"<<std::endl;
         Fraction* fAll = second_layer.size() > 1 ? second_layer[0] : new Fraction(0, d.n, s, useClasses);
-    for(int i = 1; i < second_layer.size(); i++){
+    for(unsigned int i = 1; i < second_layer.size(); i++){
         fAll->mergeIn(second_layer[i]);
     }
     //END second division layer
@@ -67,7 +64,7 @@ std::vector<std::pair<unsigned int, unsigned int> > SPAN::runSpan(Data& d, int s
     bins.runSPAN(k, fAll);
 	
 	std::vector<std::pair<unsigned int, unsigned int> > resultVector;
-	for(int i = 0; i < fAll->seg->size(); i++){
+	for(unsigned int i = 0; i < fAll->seg->size(); i++){
 		std::cout<<"Adding "<<(*(fAll->seg))[i].start + 1<<", "<<(*(fAll->seg))[i].end<<std::endl;
  		resultVector.push_back(std::make_pair((*(fAll->seg))[i].start + 1,(*(fAll->seg))[i].end));
  	}

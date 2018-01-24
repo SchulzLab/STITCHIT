@@ -59,21 +59,22 @@ void GTFReader::findGenomicLocation(const std::string& targetGeneID){
 
 const std::string& GTFReader::getGTFfileName(){
 	return gtfFileName_;
-};
+}
 
 const std::tuple<std::string,unsigned int, unsigned int>& GTFReader::getGenomicLocation(){
 	return genomicLocation_;
-};
+}
 
 const int& GTFReader::getWindow(){
 	return window_;
-};
+}
 
 void GTFReader::setWindow(int window){
 	window_ = window;
-};
+}
 
 
 std::ostream& operator<<(std::ostream& os, const GTFReader& r){
 	os << std::get<0>(r.genomicLocation_) << " " << std::get<1>(r.genomicLocation_) << " " << std::get<2>(r.genomicLocation_) <<std::endl;
+	return os;
 }

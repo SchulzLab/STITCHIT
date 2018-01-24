@@ -74,4 +74,5 @@ std::ostream& operator<<(std::ostream& os, const ExpressionReader& r){
           for (const auto& element : r.expressionMap_){
                     os << element.first << " " << element.second << std::endl;
           }
+	return os;
 }   

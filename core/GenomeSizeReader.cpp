@@ -50,4 +50,5 @@ std::ostream& operator<<(std::ostream& os, const GenomeSizeReader& r){
 	for (const auto& element : r.genomeSize_){
           	os << element.first << " " << element.second << std::endl;
 	}
+	return os;
 } 

@@ -249,7 +249,7 @@ double Data::ModelWeight(S::interval iv, data_segment e, int i, int j){
         }else if(method == 'l'){
             c1 = Laplace(iv, p1, o1, N);
         }else{
-            double c1 = SAE(iv, p1, o1);
+            c1 = SAE(iv, p1, o1);
         }
         return (c1 / (double)all.size());
     }
@@ -413,7 +413,6 @@ S::weights Data::precomputeWeightsSAEMap(S::segmentation seg){
 S::weights Data::precomputeWeightsGaussFast(Fraction* f){
     precalculateCSSandCS(f);
     int beta = (int) f->seg->size();
-    bool classification = f->binary;
     S::weights w;
     for(int i = 0; i < beta; i++){
         std::vector< double > dummy(i+1);
