@@ -26,7 +26,7 @@ int main(int argc, char *argv[]){
           const std::string geneID = argv[3];
           const std::string expressionDiscretised = argv[4];
           const std::string genomeSizeFile = argv[5];
-          const unsigned int window = 100000;
+          const unsigned int window = 2000;
 	const unsigned int stepSize = 1;
 	const unsigned int maxCores = 3;
 	bool verbose = false;
