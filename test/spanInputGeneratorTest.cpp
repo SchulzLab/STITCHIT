@@ -9,8 +9,8 @@ class SPANInputGeneratorTest : public ::testing::Test{
 		 :exp_(ExpressionReader(TEST_DATA_PATH("Expression_Data_Sample.txt")))
 	{
 		exp_.loadExpressionData("ENSG00000184990");
-		coordinates_=std::make_tuple("chr3",10,40);
-		coordinatesOOR_=std::make_tuple("chr3",1000,1030);
+		coordinates_=std::make_tuple("chr3",10,40,"+");
+		coordinatesOOR_=std::make_tuple("chr3",1000,1030,"-");
 	}
 
 	void virtual SetUp(){
@@ -18,8 +18,8 @@ class SPANInputGeneratorTest : public ::testing::Test{
 	}
 	public:
 		ExpressionReader exp_;
-		std::tuple<std::string, unsigned int, unsigned int> coordinates_;
-		std::tuple<std::string, unsigned int, unsigned int> coordinatesOOR_;
+		std::tuple<std::string, unsigned int, unsigned int,std::string> coordinates_;
+		std::tuple<std::string, unsigned int, unsigned int,std::string> coordinatesOOR_;
 
 };
 
@@ -81,10 +81,10 @@ TEST_F(SPANInputGeneratorTest, CorrectColumnCountsOfEachRowInInputMatrix){
 	SPANInputGenerator sig (TEST_DATA_PATH("BigWigFiles/"),exp_.getExpressionMap());
 	sig.generateSPANInput(coordinates_);
 	std::vector<std::vector<double>> inputMatrix =sig.getInputMatrix();
-	ASSERT_EQ(inputMatrix[0].size(),30);
-	ASSERT_EQ(inputMatrix[1].size(),30);
-	ASSERT_EQ(inputMatrix[2].size(),30);
-	ASSERT_EQ(inputMatrix[3].size(),30);
+	ASSERT_EQ(inputMatrix[0].size(),31);
+	ASSERT_EQ(inputMatrix[1].size(),31);
+	ASSERT_EQ(inputMatrix[2].size(),31);
+	ASSERT_EQ(inputMatrix[3].size(),31);
 }
 
 
@@ -93,7 +93,7 @@ TEST_F(SPANInputGeneratorTest, CorrectOutputSample_B_S00CWT11){
 	sig.generateSPANInput(coordinates_);
 	std::vector<std::string> sampleNames = sig.getSampleNames();
 	std::vector<std::vector<double>> inputMatrix =sig.getInputMatrix();
-	std::vector<double> dataVector={0,0,0,0,0,0,0,0,0,0,10,10,10,10,10,20,20,20,20,20,10,10,10,10,10,0,0,0,0,0};
+	std::vector<double> dataVector={0,0,0,0,0,0,0,0,0,0,10,10,10,10,10,20,20,20,20,20,10,10,10,10,10,0,0,0,0,0,1};
 	ASSERT_EQ(inputMatrix[std::find(sampleNames.begin(),sampleNames.end(),"B_S00CWT11")-sampleNames.begin()],dataVector);
 }
 
@@ -102,7 +102,7 @@ TEST_F(SPANInputGeneratorTest, CorrectOutputSample_B_S004BT12){
 	sig.generateSPANInput(coordinates_);
 	std::vector<std::string> sampleNames = sig.getSampleNames();
 	std::vector<std::vector<double>> inputMatrix =sig.getInputMatrix();
-	std::vector<double> dataVector={20,20,20,20,20,30,30,30,30,30,20,20,20,20,20,0,0,0,0,0,10,10,10,10,10,5,5,5,5,5};
+	std::vector<double> dataVector={20,20,20,20,20,30,30,30,30,30,20,20,20,20,20,0,0,0,0,0,10,10,10,10,10,5,5,5,5,5,0};
 	ASSERT_EQ(inputMatrix[std::find(sampleNames.begin(),sampleNames.end(),"B_S004BT12")-sampleNames.begin()],dataVector);
 }
 
@@ -111,7 +111,7 @@ TEST_F(SPANInputGeneratorTest, CorrectOutputSample_B_S00DFM11){
 	sig.generateSPANInput(coordinates_);
 	std::vector<std::string> sampleNames = sig.getSampleNames();
 	std::vector<std::vector<double>> inputMatrix =sig.getInputMatrix();
-	std::vector<double> dataVector={10,10,10,10,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	std::vector<double> dataVector={10,10,10,10,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1};
 	ASSERT_EQ(inputMatrix[std::find(sampleNames.begin(),sampleNames.end(),"B_S00DFM11")-sampleNames.begin()],dataVector);
 }
 
@@ -120,7 +120,7 @@ TEST_F(SPANInputGeneratorTest, CorrectOutputSample_B_S00Y4Y11){
 	sig.generateSPANInput(coordinates_);
 	std::vector<std::string> sampleNames = sig.getSampleNames();
 	std::vector<std::vector<double>> inputMatrix =sig.getInputMatrix();
-	std::vector<double> dataVector={20,20,20,20,20,30,30,30,30,30,20,20,20,20,20,0,0,0,0,0,10,10,10,10,10,5,5,5,5,5};
+	std::vector<double> dataVector={20,20,20,20,20,30,30,30,30,30,20,20,20,20,20,0,0,0,0,0,10,10,10,10,10,5,5,5,5,5,1};
 	ASSERT_EQ(inputMatrix[std::find(sampleNames.begin(),sampleNames.end(),"B_S00Y4Y11")-sampleNames.begin()],dataVector);
 }
 
@@ -135,10 +135,10 @@ TEST_F(SPANInputGeneratorTest, CorrectColumnCountsOfEachRowInInputMatrix_OOR){
 	SPANInputGenerator sig (TEST_DATA_PATH("BigWigFiles/"),exp_.getExpressionMap());
 	sig.generateSPANInput(coordinatesOOR_);
 	std::vector<std::vector<double>> inputMatrix =sig.getInputMatrix();
-	ASSERT_EQ(inputMatrix[0].size(),30);
-	ASSERT_EQ(inputMatrix[1].size(),30);
-	ASSERT_EQ(inputMatrix[2].size(),30);
-	ASSERT_EQ(inputMatrix[3].size(),30);
+	ASSERT_EQ(inputMatrix[0].size(),31);
+	ASSERT_EQ(inputMatrix[1].size(),31);
+	ASSERT_EQ(inputMatrix[2].size(),31);
+	ASSERT_EQ(inputMatrix[3].size(),31);
 }
 
 TEST_F(SPANInputGeneratorTest, CorrectOutputSample_B_S00CWT11_OOR){
@@ -146,6 +146,6 @@ TEST_F(SPANInputGeneratorTest, CorrectOutputSample_B_S00CWT11_OOR){
 	sig.generateSPANInput(coordinatesOOR_);
 	std::vector<std::string> sampleNames = sig.getSampleNames();
 	std::vector<std::vector<double>> inputMatrix =sig.getInputMatrix();
-	std::vector<double> dataVector={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	std::vector<double> dataVector={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1};
 	ASSERT_EQ(inputMatrix[std::find(sampleNames.begin(),sampleNames.end(),"B_S00CWT11")-sampleNames.begin()],dataVector);
 }

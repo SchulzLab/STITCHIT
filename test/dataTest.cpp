@@ -45,7 +45,7 @@ TEST_F(DATATest, getElement){
 TEST_F(DATATest,setDat){
 	ExpressionReader exp_ = ExpressionReader(TEST_DATA_PATH("Expression_Data_Sample.txt"));
 	exp_.loadExpressionData("ENSG00000184990");
-	std::tuple<std::string, unsigned int, unsigned int> coordinates_=std::make_tuple("chr3",10,40);
+	std::tuple<std::string, unsigned int, unsigned int,std::string> coordinates_=std::make_tuple("chr3",10,40,"+");
 	SPANInputGenerator sig (TEST_DATA_PATH("BigWigFiles/"),exp_.getExpressionMap());
 	sig.generateSPANInput(coordinates_);
           std::vector<std::string> sampleNames = sig.getSampleNames();

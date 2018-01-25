@@ -68,7 +68,7 @@ std::vector<double> SPANInputGenerator::parseIntervals(bwOverlappingIntervals_t 
  * @return
  * @throw
  */
-void SPANInputGenerator::generateSPANInput(const std::tuple<std::string, unsigned int, unsigned int>& genomicCoordinates){
+void SPANInputGenerator::generateSPANInput(const std::tuple<std::string, unsigned int, unsigned int,std::string>& genomicCoordinates){
           //Generating per base input for SPAN
           if(bwInit(1<<17) != 0) throw std::invalid_argument("Error occured in bwInit.");
           //Iterating through all files in the specified directory
@@ -95,11 +95,12 @@ void SPANInputGenerator::generateSPANInput(const std::tuple<std::string, unsigne
                                         std::copy(std::get<0>(genomicCoordinates).begin(), std::get<0>(genomicCoordinates).end(), chromosome_c_str);
                                         chromosome_c_str[std::get<0>(genomicCoordinates).size()] = '\0'; // don't forget the terminating 0
                                         intervals = bwGetValues(fp,chromosome_c_str,std::get<1>(genomicCoordinates),std::get<2>(genomicCoordinates),1);
-                                        currentVec=parseIntervals(intervals,0,expressionMap_[entry.path().stem().string()],std::get<2>(genomicCoordinates)-std::get<1>(genomicCoordinates));
+                                        currentVec=parseIntervals(intervals,0,expressionMap_[entry.path().stem().string()],(std::get<2>(genomicCoordinates))-(std::get<1>(genomicCoordinates)));
                                         bwDestroyOverlappingIntervals(intervals);
                                         delete[] chromosome_c_str;
                                         bwClose(fp);
                                         bwCleanup();
+				currentVec.push_back(expressionMap_[entry.path().stem().string()]);
                                         inputMatrix_.push_back(currentVec);
                               }else{
                                         throw std::invalid_argument("No expression information available for "+filenameS);

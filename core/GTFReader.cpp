@@ -5,7 +5,7 @@ GTFReader::GTFReader(const std::string& gtfFileName, std::map<std::string, int>&
           genomeSize_(genomeSize),                                                                                                                                                                                                             
           window_(window)
 {
-	genomicLocation_= std::make_tuple("chr0",0,0);
+	genomicLocation_= std::make_tuple("chr0",0,0,"NA");
 }
 
 /*! \brief Brief description.
@@ -16,7 +16,7 @@ GTFReader::GTFReader(const std::string& gtfFileName, std::map<std::string, int>&
  */
 void GTFReader::findGenomicLocation(const std::string& targetGeneID){
 	int pos1, pos2;
-	std::string chromosome, buf, temp, convertedGeneID, geneID;
+	std::string chromosome, buf, temp, strand, convertedGeneID, geneID;
 	std::ifstream annotationFile;
 	const int zero = 0;
 	annotationFile.open(gtfFileName_);
@@ -29,12 +29,12 @@ void GTFReader::findGenomicLocation(const std::string& targetGeneID){
 		if (temp != ""){
 			if (ss >> chromosome >> buf >> buf){
 				if (buf == "gene"){
-					if (ss >> pos1 >> pos2 >> buf >> buf >> buf >> buf >> geneID){
+					if (ss >> pos1 >> pos2 >> buf >> strand >> buf >> buf >> geneID){
 						convertedGeneID=geneID.substr(1,15);    
 						if (convertedGeneID==targetGeneID){
 							pos1=std::max(zero,pos1-window_);
 							pos2=std::min(genomeSize_[chromosome],pos2+window_);
-							genomicLocation_=std::make_tuple(chromosome, pos1, pos2);
+							genomicLocation_=std::make_tuple(chromosome, pos1, pos2, strand);
 							flag=true;
 							break;
 						}
@@ -61,7 +61,7 @@ const std::string& GTFReader::getGTFfileName(){
 	return gtfFileName_;
 }
 
-const std::tuple<std::string,unsigned int, unsigned int>& GTFReader::getGenomicLocation(){
+const std::tuple<std::string,unsigned int, unsigned int,std::string>& GTFReader::getGenomicLocation(){
 	return genomicLocation_;
 }
 

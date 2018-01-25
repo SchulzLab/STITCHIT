@@ -61,6 +61,19 @@ void Data::setData(std::vector<std::vector<double> > input, bool binaryClassifie
 		}
 	}
 	resolution = 10;
+
+	for (int i = 0; i < m; i++){
+		if (binaryClassifierInLastRow || ignoreLabel){
+			if (data[i][n-1] == 0){
+				cl0.push_back(i);
+			}
+			else{
+				cl1.push_back(i);
+			}
+			data[i].pop_back();
+		}
+		all.push_back(i);
+	}
 }
 
 

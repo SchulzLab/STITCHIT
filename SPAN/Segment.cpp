@@ -152,8 +152,10 @@ void Binning::applyDPFlexi(int kbins, Fraction* f){
     }
     f->compressed = bestBinning.totalCosts;
     double compression = f->compressed / f->initial * 100;
+    if (verbose){
     std::cout << "----------------RESULTS----------------\n";
     printf("The relative compression is %.4f%%.\n", compression);
+}
     f->updateSegmentation(bestBinning.bins);
 }
 
@@ -187,12 +189,13 @@ void Binning::runSPAN(int k, Fraction* fraction){
     } // if merged segments already exist
     
     bool autorun = k <= 1;
+	if (verbose){
     std::cout << "Segment-count before execution: " << fraction->seg->size() << " (initial step size=" << fraction->stepSize << ") \n";
     if (autorun) {
         std::cout << "--> Use MDL to select number of segments. \n";
     } else {
         std::cout << "--> Don't trust MDL and find k=" << k << " segments. \n";
-    }
+    }}
     applyDPFlexi(k,fraction);
-    printSegmentation(*(fraction->seg));
+//    printSegmentation(*(fraction->seg));
 }

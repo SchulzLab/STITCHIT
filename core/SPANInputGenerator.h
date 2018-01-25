@@ -20,7 +20,7 @@
 class SPANInputGenerator{
 	public:
 	SPANInputGenerator(const std::string& path, std::map<std::string, unsigned int> expressionMap);
-	void generateSPANInput(const std::tuple<std::string, unsigned int, unsigned int>& genomicCoordinates);
+	void generateSPANInput(const std::tuple<std::string, unsigned int, unsigned int,std::string>& genomicCoordinates);
 	std::vector<std::vector<double>>& getInputMatrix();	
 	std::vector<std::string>& getSampleNames();
           friend std::ostream& operator<<(std::ostream& os,const SPANInputGenerator& r);

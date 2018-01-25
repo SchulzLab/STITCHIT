@@ -59,7 +59,7 @@ TEST_F(GTFReaderTest, SetWindow){
 
 TEST_F(GTFReaderTest, EmptyRegion){
 	GTFReader gtf_(TEST_DATA_PATH("gencode.sampleV26.gtf"),g_.getGenomeSize(),5000);
-	std::tuple<std::string,unsigned int, unsigned int> location = gtf_.getGenomicLocation();
+	std::tuple<std::string,unsigned int, unsigned int,std::string> location = gtf_.getGenomicLocation();
 	ASSERT_EQ(std::get<0>(location),"chr0");
 	ASSERT_EQ(std::get<1>(location),0);
 	ASSERT_EQ(std::get<2>(location),0);
@@ -68,7 +68,7 @@ TEST_F(GTFReaderTest, EmptyRegion){
 TEST_F(GTFReaderTest, StandardGeneRetrievalNoShift){
 	GTFReader gtf_(TEST_DATA_PATH("gencode.sampleV26.gtf"),g_.getGenomeSize(),0);
 	gtf_.findGenomicLocation("ENSG00000184990");
-	std::tuple<std::string,unsigned int, unsigned int> location = gtf_.getGenomicLocation();
+	std::tuple<std::string,unsigned int, unsigned int,std::string> location = gtf_.getGenomicLocation();
 	ASSERT_EQ(std::get<0>(location),"chr14");
 	ASSERT_EQ(std::get<1>(location),104753100);
 	ASSERT_EQ(std::get<2>(location),104768494);
@@ -77,7 +77,7 @@ TEST_F(GTFReaderTest, StandardGeneRetrievalNoShift){
 TEST_F(GTFReaderTest, StandardGeneRetrievalShift){
 	GTFReader gtf_(TEST_DATA_PATH("gencode.sampleV26.gtf"),g_.getGenomeSize(),5000);
 	gtf_.findGenomicLocation("ENSG00000184990");
-	std::tuple<std::string,unsigned int, unsigned int> location = gtf_.getGenomicLocation();
+	std::tuple<std::string,unsigned int, unsigned int,std::string> location = gtf_.getGenomicLocation();
 	ASSERT_EQ(std::get<0>(location),"chr14");
 	ASSERT_EQ(std::get<1>(location),104748100);
 	ASSERT_EQ(std::get<2>(location),104773494);
@@ -85,7 +85,7 @@ TEST_F(GTFReaderTest, StandardGeneRetrievalShift){
 TEST_F(GTFReaderTest, StandardGeneRetrievalNegativePosition){
 	GTFReader gtf_(TEST_DATA_PATH("gencode.sampleV26.gtf"),g_.getGenomeSize(),104753110);
 	gtf_.findGenomicLocation("ENSG00000184990");
-	std::tuple<std::string,unsigned int, unsigned int> location = gtf_.getGenomicLocation();
+	std::tuple<std::string,unsigned int, unsigned int,std::string> location = gtf_.getGenomicLocation();
 	ASSERT_EQ(std::get<0>(location),"chr14");
 	ASSERT_EQ(std::get<1>(location),0);
 }
@@ -93,9 +93,10 @@ TEST_F(GTFReaderTest, StandardGeneRetrievalNegativePosition){
 TEST_F(GTFReaderTest, StandardGeneRetrievalExceedingGenomeSizePosition){
 	GTFReader gtf_(TEST_DATA_PATH("gencode.sampleV26.gtf"),g_.getGenomeSize(),2500000);
 	gtf_.findGenomicLocation("ENSG00000184990");
-	std::tuple<std::string,unsigned int, unsigned int> location = gtf_.getGenomicLocation();
+	std::tuple<std::string,unsigned int, unsigned int,std::string> location = gtf_.getGenomicLocation();
 	ASSERT_EQ(std::get<0>(location),"chr14");
 	ASSERT_EQ(std::get<2>(location),107043718);
+	ASSERT_EQ(std::get<3>(location),"+");
 }
 
 TEST_F(GTFReaderTest, GeneDoesNotExistInGTF){

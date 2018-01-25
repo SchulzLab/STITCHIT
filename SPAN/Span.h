@@ -8,7 +8,6 @@
 #include <cmath>
 #include <string>
 #include <omp.h> //Added by fschmidt
-#include "Wall_Time.h"
 #include "Data.h"
 #include "Segment.h"
 #include "Fraction.h"
@@ -18,8 +17,8 @@ class SPAN {
     
 public:
 	SPAN(){};
-	std::vector<std::pair<unsigned int, unsigned int> > runSpan(Data& d, int s, unsigned int maxCores);
-
+	std::vector<std::pair<unsigned int, unsigned int> > runSpan(Data& d, int s, unsigned int maxCores,bool verbose);
+	std::vector<std::pair<unsigned int, unsigned int> > convertSegmentationToGenomicCoordinates(std::vector<std::pair<unsigned int, unsigned int> >& segmentation, std::tuple<std::string, unsigned int, unsigned int,std::string> genomicCoordinates);
 };
 
 #endif

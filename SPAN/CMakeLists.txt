@@ -6,4 +6,4 @@ add_library (SPAN
 	Fraction.cpp 
 	Data.cpp)
 
-target_link_libraries (SPAN)
+target_link_libraries(SPAN -fopenmp)
