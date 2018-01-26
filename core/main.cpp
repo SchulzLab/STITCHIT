@@ -2,6 +2,7 @@
 #include "GenomeSizeReader.h"
 #include "GTFReader.h"
 #include "ExpressionReader.h"
+#include "BinSelection.h"
 #include "../SPAN/Data.h"
 #include "../SPAN/Span.h"
 /*
@@ -64,6 +65,7 @@ int main(int argc, char *argv[]){
 	std::cout<<"Segmentation in progress..."<<std::endl;
 	SPAN sp= SPAN();
 	std::vector<std::pair<unsigned int, unsigned int> > segments = sp.runSpan(input,stepSize,maxCores,verbose);
+	//Convert to genomic coordinates
 	std::vector<std::pair<unsigned int, unsigned int> > genomeConv= sp.convertSegmentationToGenomicCoordinates(segments,genomicCoordinates);
 	if (verbose){
 		std::cout<<SPIG<<std::endl;
@@ -73,13 +75,22 @@ int main(int argc, char *argv[]){
 	}
 	std::cout<<"Segmentation into "<<segments.size()<<" bins completed."<<std::endl;
 	//Print binning
-//	for (auto& element : segments){
-//		std::cout<<"["<<element.first<<","<<element.second<<")"<<std::endl;
-//	}
+	//	for (auto& element : segments){
+	//		std::cout<<"["<<element.first<<","<<element.second<<")"<<std::endl;
+	//	}
 
 	//Print binning
 	for (auto& element : genomeConv){
-		std::cout<<"["<<element.first<<","<<element.second<<")"<<std::endl;
+		std::cout<<"["<<element.first<<","<<element.second<<"]"<<std::endl;
 	}
+
+	//Compute signal in segmented regions
+	std::cout<<"Computing mean signal per bin and sample"<<std::endl;
+	BinSelection bs = BinSelection(bigWigPath);
+	bs.computeMeanSignal(std::get<0>(genomicCoordinates), genomeConv);
+
+	//Assess correlation of signal in bins to gene expression
+
+	//Generate a txt file with DNase signal and gene expression across sample for the gene of interest including sample IDs and genomic location
           return 0;
 } 

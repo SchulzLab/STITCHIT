@@ -9,8 +9,8 @@ class SPANInputGeneratorTest : public ::testing::Test{
 		 :exp_(ExpressionReader(TEST_DATA_PATH("Expression_Data_Sample.txt")))
 	{
 		exp_.loadExpressionData("ENSG00000184990");
-		coordinates_=std::make_tuple("chr3",10,40,"+");
-		coordinatesOOR_=std::make_tuple("chr3",1000,1030,"-");
+		coordinates_=std::make_tuple("chr3",11,41,"+");
+		coordinatesOOR_=std::make_tuple("chr3",1001,1031,"-");
 	}
 
 	void virtual SetUp(){

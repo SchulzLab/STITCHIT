@@ -70,7 +70,7 @@ std::vector<double> SPANInputGenerator::parseIntervals(bwOverlappingIntervals_t 
  */
 void SPANInputGenerator::generateSPANInput(const std::tuple<std::string, unsigned int, unsigned int,std::string>& genomicCoordinates){
           //Generating per base input for SPAN
-          if(bwInit(1<<17) != 0) throw std::invalid_argument("Error occured in bwInit.");
+          if(bwInit(1<<17) != 0) throw std::runtime_error("Error occured in bwInit.");
           //Iterating through all files in the specified directory
           if (boost::filesystem::is_directory(path_)){
                     for(auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(path_), {})){
@@ -94,7 +94,7 @@ void SPANInputGenerator::generateSPANInput(const std::tuple<std::string, unsigne
                                         char * chromosome_c_str = new char[std::get<0>(genomicCoordinates).size() + 1];
                                         std::copy(std::get<0>(genomicCoordinates).begin(), std::get<0>(genomicCoordinates).end(), chromosome_c_str);
                                         chromosome_c_str[std::get<0>(genomicCoordinates).size()] = '\0'; // don't forget the terminating 0
-                                        intervals = bwGetValues(fp,chromosome_c_str,std::get<1>(genomicCoordinates),std::get<2>(genomicCoordinates),1);
+                                        intervals = bwGetValues(fp,chromosome_c_str,std::get<1>(genomicCoordinates)-1,std::get<2>(genomicCoordinates)-1,1);
                                         currentVec=parseIntervals(intervals,0,expressionMap_[entry.path().stem().string()],(std::get<2>(genomicCoordinates))-(std::get<1>(genomicCoordinates)));
                                         bwDestroyOverlappingIntervals(intervals);
                                         delete[] chromosome_c_str;
@@ -111,14 +111,33 @@ void SPANInputGenerator::generateSPANInput(const std::tuple<std::string, unsigne
           }
 }
 
+/*! \brief Brief description.
+ *
+ *  Detailed description starts here.
+ * @param
+ * @param
+ */
 std::vector<std::string>& SPANInputGenerator::getSampleNames(){
 	return sampleNames_;
 }
 
+
+/*! \brief Brief description.
+ *
+ *  Detailed description starts here.
+ * @param
+ * @param
+ */
 std::vector<std::vector<double>>& SPANInputGenerator::getInputMatrix(){
 	return inputMatrix_;
 }
 
+/*! \brief Brief description.
+ *
+ *  Detailed description starts here.
+ * @param
+ * @param
+ */
 std::ostream& operator<<(std::ostream& os, const SPANInputGenerator& r){
 	unsigned int counter=0;
 	for (const auto& firstV : r.inputMatrix_){

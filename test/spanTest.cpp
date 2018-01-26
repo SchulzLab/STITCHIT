@@ -31,26 +31,26 @@ TEST_F(SPANTest, getElement){
 TEST_F(SPANTest,setDat){
 	ExpressionReader exp_ = ExpressionReader(TEST_DATA_PATH("Expression_Data_Sample.txt"));
 	exp_.loadExpressionData("ENSG00000184990");
-	std::tuple<std::string, unsigned int, unsigned int,std::string> coordinates_=std::make_tuple("chr3",1,49,"+");
+	std::tuple<std::string, unsigned int, unsigned int,std::string> coordinates_=std::make_tuple("chr3",1,40,"+");
 	SPANInputGenerator sig (TEST_DATA_PATH("BigWigFiles/"),exp_.getExpressionMap());
 	sig.generateSPANInput(coordinates_);
 	d_.setData(sig.getInputMatrix(),true,false,'g',1,false);
 	SPAN s_ = SPAN();
 	std::vector<std::pair<unsigned int, unsigned int> > resultVector = s_.runSpan(d_);
-	ASSERT_EQ(resultVector.size(),4);
+	ASSERT_EQ(resultVector.size(),8);
 }
 
 
 TEST_F(SPANTest,coordConversion){
 	ExpressionReader exp_ = ExpressionReader(TEST_DATA_PATH("Expression_Data_Sample.txt"));
 	exp_.loadExpressionData("ENSG00000184990");
-	std::tuple<std::string, unsigned int, unsigned int,std::string> coordinates_=std::make_tuple("chr3",3,40,"+");
+	std::tuple<std::string, unsigned int, unsigned int,std::string> coordinates_=std::make_tuple("chr3",4,41,"+");
 	SPANInputGenerator sig (TEST_DATA_PATH("BigWigFiles/"),exp_.getExpressionMap());
 	sig.generateSPANInput(coordinates_);
 	d_.setData(sig.getInputMatrix(),true,false,'g',1,false);
 	SPAN s_ = SPAN();
 	std::vector<std::pair<unsigned int, unsigned int> > resultVector = s_.runSpan(d_);
 	std::vector<std::pair<unsigned int, unsigned int> > genomeConv= s_.convertSegmentationToGenomicCoordinates(resultVector,coordinates_);
-	ASSERT_EQ(genomeConv[0].first,3);
-	ASSERT_EQ(genomeConv[genomeConv.size()-1].second,40);
+	ASSERT_EQ(genomeConv[0].first,4);
+	ASSERT_EQ(genomeConv[genomeConv.size()-1].second,41);
 }
