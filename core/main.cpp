@@ -15,9 +15,9 @@ argv5 genome size file
 
 int main(int argc, char *argv[]){
           //Check the provided arguments
-          if(argc != 6) {
+          if(argc != 7) {
                     std::cerr<<"Incorrect number of parameters. Usage:"<<std::endl;
-                    std::cerr<<"<Path to bigwig files> <Gene annotation file in gencode format> <geneID> <Discretised gene expression matrix> <Genome size file>"<<std::endl;
+                    std::cerr<<"<Path to bigwig files> <Gene annotation file in gencode format> <geneID> <Discretised gene expression matrix> <Original gene expression matrix> <Genome size file>"<<std::endl;
                     return 1;
           }
 
@@ -26,7 +26,8 @@ int main(int argc, char *argv[]){
           const std::string annotationFile = argv[2];
           const std::string geneID = argv[3];
           const std::string expressionDiscretised = argv[4];
-          const std::string genomeSizeFile = argv[5];
+          const std::string expressionOriginal = argv[5];
+	const std::string genomeSizeFile = argv[6];
           const unsigned int window = 2000;
 	const unsigned int stepSize = 1;
 	const unsigned int maxCores = 3;
@@ -46,10 +47,10 @@ int main(int argc, char *argv[]){
 	std::cout<<"Coordinates found: "<<std::get<0>(genomicCoordinates)<<" "<<std::get<1>(genomicCoordinates)+window<<" "<<std::get<2>(genomicCoordinates)-window<<",gene length: "<<std::get<2>(genomicCoordinates)-std::get<1>(genomicCoordinates)<<std::endl;
 	
           //Generating expression map
-	std::cout<<"Extracting gene expression information for "<<geneID<<std::endl;
+	std::cout<<"Extracting discretised gene expression information for "<<geneID<<std::endl;
 	ExpressionReader expR(expressionDiscretised);
 	expR.loadExpressionData(geneID);
-	std::map<std::string,unsigned int> expressionMap;
+	std::map<std::string, double> expressionMap;
 	expressionMap = expR.getExpressionMap();
 
           //GenerateSPANInput
@@ -67,12 +68,7 @@ int main(int argc, char *argv[]){
 	std::vector<std::pair<unsigned int, unsigned int> > segments = sp.runSpan(input,stepSize,maxCores,verbose);
 	//Convert to genomic coordinates
 	std::vector<std::pair<unsigned int, unsigned int> > genomeConv= sp.convertSegmentationToGenomicCoordinates(segments,genomicCoordinates);
-	if (verbose){
-		std::cout<<SPIG<<std::endl;
-		std::cout<<gsr<<std::endl;
-		std::cout<<expR<<std::endl;
-		std::cout<<gtf<<std::endl;
-	}
+	
 	std::cout<<"Segmentation into "<<segments.size()<<" bins completed."<<std::endl;
 	//Print binning
 	//	for (auto& element : segments){
@@ -88,9 +84,23 @@ int main(int argc, char *argv[]){
 	std::cout<<"Computing mean signal per bin and sample"<<std::endl;
 	BinSelection bs = BinSelection(bigWigPath);
 	bs.computeMeanSignal(std::get<0>(genomicCoordinates), genomeConv);
-
+	//Loading original gene expression data
+	std::cout<<"Extracting original gene expression information for "<<geneID<<std::endl;
+	ExpressionReader expO(expressionOriginal);
+	expO.loadExpressionData(geneID);
+	std::map<std::string, double> expressionMapO;
+	expressionMapO = expO.getExpressionMap();
 	//Assess correlation of signal in bins to gene expression
+	bs.computeCorrelation(expressionMapO);
+
 
 	//Generate a txt file with DNase signal and gene expression across sample for the gene of interest including sample IDs and genomic location
-          return 0;
+          if (verbose){
+		std::cout<<SPIG<<std::endl;
+		std::cout<<gsr<<std::endl;
+		std::cout<<expR<<std::endl;
+		std::cout<<gtf<<std::endl;
+	}
+	
+	return 0;
 } 

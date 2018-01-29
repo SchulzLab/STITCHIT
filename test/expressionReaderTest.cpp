@@ -7,7 +7,8 @@ class ExpressionReaderTest : public ::testing::Test{
 	ExpressionReaderTest()
 		:expR_(ExpressionReader(TEST_DATA_PATH("Expression_Data_Sample.txt"))),
 		 expR2_(ExpressionReader(TEST_DATA_PATH("Expression_Data_Phony_Sample.txt"))),
-		 expR3_(ExpressionReader(TEST_DATA_PATH("Expression_Data_Does_Not_Exist.txt")))
+		 expR3_(ExpressionReader(TEST_DATA_PATH("Expression_Data_Does_Not_Exist.txt"))),
+		 expR4_(ExpressionReader(TEST_DATA_PATH("Expression_Data_Sample_Double.txt")))
 	{
 	}
 
@@ -18,6 +19,7 @@ class ExpressionReaderTest : public ::testing::Test{
 	ExpressionReader expR_;
 	ExpressionReader expR2_;
 	ExpressionReader expR3_;
+	ExpressionReader expR4_;
 
 };
 
@@ -53,11 +55,20 @@ TEST_F(ExpressionReaderTest, IsNotEmpty){
 
 TEST_F(ExpressionReaderTest, SIVA1){
 	expR_.loadExpressionData("ENSG00000184990");
-	std::map<std::string, unsigned int> expressionData = expR_.getExpressionMap();
+	std::map<std::string, double> expressionData = expR_.getExpressionMap();
 	ASSERT_EQ(expressionData["B_S004BT12"],0);
 	ASSERT_EQ(expressionData["B_S00CWT11"],1);
 	ASSERT_EQ(expressionData["B_S00DFM11"],1);
 	ASSERT_EQ(expressionData["B_S00Y4Y11"],1);
+}
+
+TEST_F(ExpressionReaderTest, SIVA2){
+	expR4_.loadExpressionData("ENSG00000184990");
+	std::map<std::string, double> expressionData = expR4_.getExpressionMap();
+	ASSERT_EQ(expressionData["B_S004BT12"],0.3);
+	ASSERT_EQ(expressionData["B_S00CWT11"],110.);
+	ASSERT_EQ(expressionData["B_S00DFM11"],103.1);
+	ASSERT_EQ(expressionData["B_S00Y4Y11"],612.001);
 }
 
 TEST_F(ExpressionReaderTest, GeneDoesNotExist){

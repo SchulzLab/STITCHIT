@@ -12,7 +12,7 @@ class ExpressionReader{
 	public:
 	ExpressionReader(const std::string& expFileName);
 	void loadExpressionData(const std::string& targetGeneID);
-	std::map<std::string,unsigned int>& getExpressionMap();
+	std::map<std::string, double>& getExpressionMap();
 	const std::string& getFilename();
 
           friend std::ostream& operator<<(std::ostream& os,const ExpressionReader& r);
@@ -20,7 +20,7 @@ class ExpressionReader{
 
 	private:
 	const std::string expFileName_;
-	std::map<std::string,unsigned int> expressionMap_; 
+	std::map<std::string, double> expressionMap_; 
 };
 
 #endif

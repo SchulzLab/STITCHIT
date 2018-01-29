@@ -30,7 +30,7 @@ void ExpressionReader::loadExpressionData(const std::string& targetGeneID){
           }         
 	unsigned int numberSamples = sampleNames.size();
           //Generating expression map
-          unsigned int value;
+          double value;
           unsigned int counter=0;
 	bool flag=false;
           while (!expressionFile.eof()){
@@ -61,7 +61,7 @@ void ExpressionReader::loadExpressionData(const std::string& targetGeneID){
 	}
 }
 
-std::map<std::string,unsigned int>& ExpressionReader::getExpressionMap(){
+std::map<std::string, double>& ExpressionReader::getExpressionMap(){
 	return expressionMap_;
 }
 

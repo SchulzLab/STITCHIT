@@ -1,5 +1,6 @@
 #include "../BigWig/bigWig.h"
 #include "BinSelection.h"
+#include "CorComp.h"
 
 BinSelection::BinSelection(const std::string& path)
 	:path_(path)
@@ -50,6 +51,34 @@ void BinSelection::computeMeanSignal(std::string& chrom, const std::vector<std::
 	bwCleanup();
 }
 
+
+std::vector<double> BinSelection::getExpressionVectorByNames(std::map<std::string, double>& expressionMap){
+	std::vector<double> expVecTemp;
+	for (auto& sample : sampleNames_){
+		expVecTemp.push_back(expressionMap[sample]);
+	}
+	return expVecTemp;
+}
+
+std::vector<double> BinSelection::getSignalVectorBySegment(unsigned int segID){
+	std::vector<double> segmentSignal;
+	for (unsigned int sam = 0; sam < meanSignal_.size(); sam++){
+		segmentSignal.push_back(meanSignal_[sam][segID]);
+	}			
+	return segmentSignal;
+}
+
+std::vector<double> BinSelection::computeCorrelation(std::map<std::string, double>& expressionMap){
+	std::vector<double> correlation;
+	unsigned int numSeg = meanSignal_[0].size();
+	std::vector<double> expVec=getExpressionVectorByNames(expressionMap);
+	for (unsigned int seg = 0; seg < numSeg; seg++){
+		std::vector<double> signalVec = getSignalVectorBySegment(seg);
+		CorComp cC(expVec,signalVec);
+		correlation.push_back(cC.computePearsonCorrelation());
+	}
+	return correlation;
+}
 
 std::vector<std::vector<double> >& BinSelection::getMeanSignal(){
 	return meanSignal_;
