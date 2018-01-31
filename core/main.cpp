@@ -92,10 +92,11 @@ int main(int argc, char *argv[]){
 	std::cout<<"Computing correlation between signal and gene expression"<<std::endl;
 	//Assess correlation of signal in bins to gene expression
 	std::vector<std::pair<double,double> > corP = bs.computePearsonCorrelation(expressionMapO);
+	std::cout<<"Pearson based correlation"<<std::endl;
 	for (auto& element : corP){
 		std::cout<<element.first<<" "<<element.second<<std::endl;
 	}
-
+	std::cout<<"Spearman based correlation"<<std::endl;
 	std::vector<std::pair<double,double> > corS = bs.computeSpearmanCorrelation(expressionMapO);
 	for (auto& element : corS){
 		std::cout<<element.first<<" "<<element.second<<std::endl;
