@@ -68,17 +68,35 @@ std::vector<double> BinSelection::getSignalVectorBySegment(unsigned int segID){
 	return segmentSignal;
 }
 
-std::vector<double> BinSelection::computeCorrelation(std::map<std::string, double>& expressionMap){
-	std::vector<double> correlation;
+std::vector<std::pair<double,double> > BinSelection::computePearsonCorrelation(std::map<std::string, double>& expressionMap){
+	std::vector<std::pair<double, double> > correlation;
 	unsigned int numSeg = meanSignal_[0].size();
 	std::vector<double> expVec=getExpressionVectorByNames(expressionMap);
 	for (unsigned int seg = 0; seg < numSeg; seg++){
 		std::vector<double> signalVec = getSignalVectorBySegment(seg);
 		CorComp cC(expVec,signalVec);
-		correlation.push_back(cC.computePearsonCorrelation());
+		double cor = cC.computePearsonCorrelation();
+		double pValue = cC.getPvalue(cor);
+		correlation.push_back(std::make_pair(cor,pValue));
 	}
 	return correlation;
 }
+
+std::vector<std::pair<double, double> > BinSelection::computeSpearmanCorrelation(std::map<std::string, double>& expressionMap){
+	std::vector<std::pair<double, double> > correlation;
+	unsigned int numSeg = meanSignal_[0].size();
+	std::vector<double> expVec=getExpressionVectorByNames(expressionMap);
+	for (unsigned int seg = 0; seg < numSeg; seg++){
+		std::vector<double> signalVec = getSignalVectorBySegment(seg);
+		CorComp cC(expVec,signalVec);
+		double cor = cC.computeSpearmanCorrelation();
+		double pValue = cC.getPvalue(cor);
+		correlation.push_back(std::make_pair(cor,pValue));
+	}
+	return correlation;
+}
+
+
 
 std::vector<std::vector<double> >& BinSelection::getMeanSignal(){
 	return meanSignal_;

@@ -28,7 +28,7 @@ int main(int argc, char *argv[]){
           const std::string expressionDiscretised = argv[4];
           const std::string expressionOriginal = argv[5];
 	const std::string genomeSizeFile = argv[6];
-          const unsigned int window = 2000;
+          const unsigned int window = 10000;
 	const unsigned int stepSize = 1;
 	const unsigned int maxCores = 3;
 	bool verbose = false;
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]){
           //Generating expression map
 	std::cout<<"Extracting discretised gene expression information for "<<geneID<<std::endl;
 	ExpressionReader expR(expressionDiscretised);
-	expR.loadExpressionData(geneID);
+	expR.loadExpressionData(geneID,false);
 	std::map<std::string, double> expressionMap;
 	expressionMap = expR.getExpressionMap();
 
@@ -87,12 +87,19 @@ int main(int argc, char *argv[]){
 	//Loading original gene expression data
 	std::cout<<"Extracting original gene expression information for "<<geneID<<std::endl;
 	ExpressionReader expO(expressionOriginal);
-	expO.loadExpressionData(geneID);
-	std::map<std::string, double> expressionMapO;
-	expressionMapO = expO.getExpressionMap();
+	expO.loadExpressionData(geneID,false);
+	std::map<std::string, double> expressionMapO = expO.getExpressionMap();
+	std::cout<<"Computing correlation between signal and gene expression"<<std::endl;
 	//Assess correlation of signal in bins to gene expression
-	bs.computeCorrelation(expressionMapO);
+	std::vector<std::pair<double,double> > corP = bs.computePearsonCorrelation(expressionMapO);
+	for (auto& element : corP){
+		std::cout<<element.first<<" "<<element.second<<std::endl;
+	}
 
+	std::vector<std::pair<double,double> > corS = bs.computeSpearmanCorrelation(expressionMapO);
+	for (auto& element : corS){
+		std::cout<<element.first<<" "<<element.second<<std::endl;
+	}
 
 	//Generate a txt file with DNase signal and gene expression across sample for the gene of interest including sample IDs and genomic location
           if (verbose){

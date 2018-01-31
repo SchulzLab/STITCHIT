@@ -11,7 +11,7 @@
 class ExpressionReader{
 	public:
 	ExpressionReader(const std::string& expFileName);
-	void loadExpressionData(const std::string& targetGeneID);
+	void loadExpressionData(const std::string& targetGeneID,bool log2Transform);
 	std::map<std::string, double>& getExpressionMap();
 	const std::string& getFilename();
 

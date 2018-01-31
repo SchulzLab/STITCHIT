@@ -24,7 +24,8 @@ class BinSelection{
 	void computeMeanSignal(std::string& chrom, const std::vector<std::pair<unsigned int, unsigned int> >& segments);
 	std::vector<std::vector<double> >& getMeanSignal();
 	std::vector<std::string>& getSampleNames();
-	std::vector<double> computeCorrelation(std::map<std::string,double>& expressionMap);
+	std::vector<std::pair<double, double> > computePearsonCorrelation(std::map<std::string,double>& expressionMap);
+	std::vector<std::pair<double, double> > computeSpearmanCorrelation(std::map<std::string,double>& expressionMap);
 	std::vector<double> getExpressionVectorByNames(std::map<std::string,double>& expressionMap);
 	std::vector<double> getSignalVectorBySegment(unsigned int segID);
 

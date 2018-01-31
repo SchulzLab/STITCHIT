@@ -1,5 +1,6 @@
 #include "ExpressionReader.h"
 #include <iostream>
+#include <math.h> 
 
 ExpressionReader::ExpressionReader(const std::string& expFileName)
 	:expFileName_(expFileName)
@@ -14,7 +15,7 @@ ExpressionReader::ExpressionReader(const std::string& expFileName)
  * @return
  * @throw
  */
-void ExpressionReader::loadExpressionData(const std::string& targetGeneID){
+void ExpressionReader::loadExpressionData(const std::string& targetGeneID,bool log2Transform=false){
           std::ifstream expressionFile;
           expressionFile.open(expFileName_);
           if (!expressionFile) throw std::invalid_argument("Expression file "+expFileName_+" could not be opened");
@@ -40,7 +41,10 @@ void ExpressionReader::loadExpressionData(const std::string& targetGeneID){
                               if (sE >> buf){
 			          if (buf == targetGeneID){
                                                   while (sE >> value){
-                                                            expressionMap_[sampleNames[counter]]=value;
+						if (log2Transform)
+						 	expressionMap_[sampleNames[counter]]=log2(value+1.0);
+						else
+                                                            	expressionMap_[sampleNames[counter]]=value;
                                                             counter+=1;
                                                   }                                                 
 					flag=true;
@@ -51,6 +55,7 @@ void ExpressionReader::loadExpressionData(const std::string& targetGeneID){
                               	}
 			}
                               else{
+				expressionFile.close();
                                         throw std::invalid_argument("Expression file "+expFileName_+" is not properly formatted");
                               	}
                     	}
