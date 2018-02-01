@@ -137,3 +137,31 @@ TEST_F(BINSELECTIONTest,getSignalVectorByExpression){
 	ASSERT_EQ(expression[2],exp.getExpressionMap()[sN[2]]);	
 	ASSERT_EQ(expression[3],exp.getExpressionMap()[sN[3]]);
 }
+
+TEST_F(BINSELECTIONTest,correlationTest){
+	ExpressionReader exp (TEST_DATA_PATH("Expression_Data_Sample_Double.txt"));
+	exp.loadExpressionData("ENSG00000184990");
+	BinSelection bs = BinSelection(TEST_DATA_PATH("BigWigFiles"),exp.getExpressionMap());
+	std::vector<std::pair<unsigned int, unsigned int> > segments;
+	segments.push_back(std::make_pair(4,7));
+	segments.push_back(std::make_pair(9,12));
+	segments.push_back(std::make_pair(14,17));
+	std::string chrom;
+	chrom="chr3";
+	bs.computeMeanSignal(chrom,segments);
+	std::vector<std::vector<double> > signal;
+	signal = bs.getMeanSignal();
+	std::vector<std::string> sN = bs.getSampleNames();
+
+	std::vector<std::pair<double, double> > zS = bs.computePearsonCorrelation();
+	ASSERT_NEAR(zS[0].first, 0.298, 0.01);
+	ASSERT_NEAR(zS[0].second, 0.3792987, 0.01);
+	
+	ASSERT_NEAR(zS[1].first, 0.3596, 0.01);
+	ASSERT_NEAR(zS[1].second, 0.3533, 0.01);
+	
+	ASSERT_NEAR(zS[2].first,0.3916,0.01);
+	ASSERT_NEAR(zS[2].second,0.3402,0.01);
+}
+
+
