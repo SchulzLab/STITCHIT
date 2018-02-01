@@ -2,8 +2,8 @@
 #include "BinSelection.h"
 #include "CorComp.h"
 
-BinSelection::BinSelection(const std::string& path)
-	:path_(path)
+BinSelection::BinSelection(const std::string& path,std::map<std::string,double>& expressionMap)
+	:path_(path), expressionMap_(expressionMap)
 {
 	meanSignal_.resize(0);
 
@@ -52,10 +52,10 @@ void BinSelection::computeMeanSignal(std::string& chrom, const std::vector<std::
 }
 
 
-std::vector<double> BinSelection::getExpressionVectorByNames(std::map<std::string, double>& expressionMap){
+std::vector<double> BinSelection::getExpressionVectorByNames(){
 	std::vector<double> expVecTemp;
 	for (auto& sample : sampleNames_){
-		expVecTemp.push_back(expressionMap[sample]);
+		expVecTemp.push_back(expressionMap_[sample]);
 	}
 	return expVecTemp;
 }
@@ -68,10 +68,10 @@ std::vector<double> BinSelection::getSignalVectorBySegment(unsigned int segID){
 	return segmentSignal;
 }
 
-std::vector<std::pair<double,double> > BinSelection::computePearsonCorrelation(std::map<std::string, double>& expressionMap){
+std::vector<std::pair<double,double> > BinSelection::computePearsonCorrelation(){
 	std::vector<std::pair<double, double> > correlation;
 	unsigned int numSeg = meanSignal_[0].size();
-	std::vector<double> expVec=getExpressionVectorByNames(expressionMap);
+	std::vector<double> expVec=getExpressionVectorByNames();
 	for (unsigned int seg = 0; seg < numSeg; seg++){
 		std::vector<double> signalVec = getSignalVectorBySegment(seg);
 		CorComp cC(expVec,signalVec);
@@ -82,10 +82,10 @@ std::vector<std::pair<double,double> > BinSelection::computePearsonCorrelation(s
 	return correlation;
 }
 
-std::vector<std::pair<double, double> > BinSelection::computeSpearmanCorrelation(std::map<std::string, double>& expressionMap){
+std::vector<std::pair<double, double> > BinSelection::computeSpearmanCorrelation(){
 	std::vector<std::pair<double, double> > correlation;
 	unsigned int numSeg = meanSignal_[0].size();
-	std::vector<double> expVec=getExpressionVectorByNames(expressionMap);
+	std::vector<double> expVec=getExpressionVectorByNames();
 	for (unsigned int seg = 0; seg < numSeg; seg++){
 		std::vector<double> signalVec = getSignalVectorBySegment(seg);
 		CorComp cC(expVec,signalVec);
@@ -104,4 +104,26 @@ std::vector<std::vector<double> >& BinSelection::getMeanSignal(){
 
 std::vector<std::string>& BinSelection::getSampleNames(){
 	return sampleNames_;
+}
+
+/*! \brief Brief description.
+ *
+ *  Detailed description starts here.
+ * @param
+ * @param
+ */
+std::ostream& operator<<(std::ostream& os, const BinSelection& r){
+	unsigned int numSeg = r.meanSignal_[0].size();
+	std::vector<double> expVecTemp;
+	for (auto& sample : r.sampleNames_){
+		expVecTemp.push_back(r.expressionMap_[sample]);
+	}
+	for (unsigned int seg = 0; seg < numSeg; seg++){
+		os << r.sampleNames_[seg];
+		for (double element : r.meanSignal_[seg]){
+			os << "	" << element;
+		}	
+		os <<"	"<< expVecTemp[seg]<< std::endl;
+	}
+	return os;
 }

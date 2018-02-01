@@ -1,6 +1,6 @@
 #include "CorComp.h"
 #include <stdexcept>
-#include <math.h>
+#include <cmath>
 #include <algorithm>
 #include <map>
 #include <limits>	
@@ -142,14 +142,15 @@ std::vector<double> CorComp::getRanksV2(){
 
 std::pair<double, double> CorComp::getFisherZ(double cor){
 	double error;
+	double cor2 = std::abs(cor);
 	if (observationCount_ < 5)
 		error=1.0;
 	else
 		error=1.0/sqrt(observationCount_-3.0);
-	if (abs(cor)==1.0)
+	if (std::abs(cor)==1.0)
 		return std::make_pair(std::numeric_limits<double>::max(),error);
 	else
-		return std::make_pair((0.5)*log((1.0+cor)/(1.0-cor)),error);
+		return std::make_pair((0.5)*log((1.0+cor2)/(1.0-cor2)),error);
 }
 
 double CorComp::cdf(double x){

@@ -20,13 +20,18 @@ class BINSELECTIONTest : public ::testing::Test{
 
 //NOTE that coordinates are 1based, they are transformed to the zero base within the BinSelectionProcess, the intervals are both closed, i.e. [A,B].
 TEST_F(BINSELECTIONTest, constructor){
-	BinSelection bs = BinSelection(TEST_DATA_PATH("BigWigFiles"));
+	ExpressionReader exp (TEST_DATA_PATH("Expression_Data_Sample.txt"));
+	exp.loadExpressionData("ENSG00000184990");
+	BinSelection bs = BinSelection(TEST_DATA_PATH("BigWigFiles"),exp.getExpressionMap());
 	ASSERT_EQ(bs.getMeanSignal().size(),0);
 }
 
 
 TEST_F(BINSELECTIONTest,matrixSize){
-	BinSelection bs = BinSelection(TEST_DATA_PATH("BigWigFiles"));
+	ExpressionReader exp (TEST_DATA_PATH("Expression_Data_Sample.txt"));
+	exp.loadExpressionData("ENSG00000184990");
+
+	BinSelection bs = BinSelection(TEST_DATA_PATH("BigWigFiles"),exp.getExpressionMap());
 	std::vector<std::pair<unsigned int, unsigned int> > segments;
 	segments.push_back(std::make_pair(1,5));
 	segments.push_back(std::make_pair(6,10));
@@ -44,7 +49,10 @@ TEST_F(BINSELECTIONTest,matrixSize){
 
 
 TEST_F(BINSELECTIONTest,EntriesNotMatchingStepSize){
-	BinSelection bs = BinSelection(TEST_DATA_PATH("BigWigFiles"));
+	ExpressionReader exp (TEST_DATA_PATH("Expression_Data_Sample.txt"));
+	exp.loadExpressionData("ENSG00000184990");
+
+	BinSelection bs = BinSelection(TEST_DATA_PATH("BigWigFiles"),exp.getExpressionMap());
 	std::vector<std::pair<unsigned int, unsigned int> > segments;
 	segments.push_back(std::make_pair(4,7));
 	segments.push_back(std::make_pair(9,12));
@@ -74,7 +82,9 @@ TEST_F(BINSELECTIONTest,EntriesNotMatchingStepSize){
 }
 
 TEST_F(BINSELECTIONTest,getSignalVectorBySegment){
-	BinSelection bs = BinSelection(TEST_DATA_PATH("BigWigFiles"));
+	ExpressionReader exp (TEST_DATA_PATH("Expression_Data_Sample.txt"));
+	exp.loadExpressionData("ENSG00000184990");
+	BinSelection bs = BinSelection(TEST_DATA_PATH("BigWigFiles"),exp.getExpressionMap());
 	std::vector<std::pair<unsigned int, unsigned int> > segments;
 	segments.push_back(std::make_pair(4,7));
 	segments.push_back(std::make_pair(9,12));
@@ -107,7 +117,10 @@ TEST_F(BINSELECTIONTest,getSignalVectorBySegment){
 }
 
 TEST_F(BINSELECTIONTest,getSignalVectorByExpression){
-	BinSelection bs = BinSelection(TEST_DATA_PATH("BigWigFiles"));
+	ExpressionReader exp (TEST_DATA_PATH("Expression_Data_Sample.txt"));
+	exp.loadExpressionData("ENSG00000184990");
+
+	BinSelection bs = BinSelection(TEST_DATA_PATH("BigWigFiles"),exp.getExpressionMap());
 	std::vector<std::pair<unsigned int, unsigned int> > segments;
 	segments.push_back(std::make_pair(4,7));
 	segments.push_back(std::make_pair(9,12));
@@ -118,9 +131,7 @@ TEST_F(BINSELECTIONTest,getSignalVectorByExpression){
 	std::vector<std::vector<double> > signal;
 	signal = bs.getMeanSignal();
 	std::vector<std::string> sN = bs.getSampleNames();
-	ExpressionReader exp (TEST_DATA_PATH("Expression_Data_Sample.txt"));
-	exp.loadExpressionData("ENSG00000184990");
-	std::vector<double> expression = bs.getExpressionVectorByNames(exp.getExpressionMap());
+	std::vector<double> expression = bs.getExpressionVectorByNames();
 	ASSERT_EQ(expression[0],exp.getExpressionMap()[sN[0]]);
 	ASSERT_EQ(expression[1],exp.getExpressionMap()[sN[1]]);
 	ASSERT_EQ(expression[2],exp.getExpressionMap()[sN[2]]);	

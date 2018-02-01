@@ -28,10 +28,10 @@ int main(int argc, char *argv[]){
           const std::string expressionDiscretised = argv[4];
           const std::string expressionOriginal = argv[5];
 	const std::string genomeSizeFile = argv[6];
-          const unsigned int window = 10000;
+          const unsigned int window = 1000;
 	const unsigned int stepSize = 1;
 	const unsigned int maxCores = 3;
-	bool verbose = false;
+	bool verbose = true;
           //Loading genome size file
 	GenomeSizeReader gsr(genomeSizeFile);
 	gsr.loadGenomeSizeFile();
@@ -76,38 +76,44 @@ int main(int argc, char *argv[]){
 	//	}
 
 	//Print binning
-	for (auto& element : genomeConv){
-		std::cout<<"["<<element.first<<","<<element.second<<"]"<<std::endl;
-	}
+//	for (auto& element : genomeConv){
+//		std::cout<<"["<<element.first<<","<<element.second<<"]"<<std::endl;
+//	}
 
-	//Compute signal in segmented regions
-	std::cout<<"Computing mean signal per bin and sample"<<std::endl;
-	BinSelection bs = BinSelection(bigWigPath);
-	bs.computeMeanSignal(std::get<0>(genomicCoordinates), genomeConv);
 	//Loading original gene expression data
 	std::cout<<"Extracting original gene expression information for "<<geneID<<std::endl;
 	ExpressionReader expO(expressionOriginal);
 	expO.loadExpressionData(geneID,false);
 	std::map<std::string, double> expressionMapO = expO.getExpressionMap();
+
+	//Compute signal in segmented regions
+	std::cout<<"Computing mean signal per bin and sample"<<std::endl;
+	BinSelection bs = BinSelection(bigWigPath,expressionMapO);
+	bs.computeMeanSignal(std::get<0>(genomicCoordinates), genomeConv);
 	std::cout<<"Computing correlation between signal and gene expression"<<std::endl;
 	//Assess correlation of signal in bins to gene expression
-	std::vector<std::pair<double,double> > corP = bs.computePearsonCorrelation(expressionMapO);
-	std::cout<<"Pearson based correlation"<<std::endl;
-	for (auto& element : corP){
-		std::cout<<element.first<<" "<<element.second<<std::endl;
+	std::vector<std::pair<double,double> > corP = bs.computePearsonCorrelation();
+//	std::cout<<"Pearson based correlation"<<std::endl;
+//	for (auto& element : corP){
+//		std::cout<<element.first<<" "<<element.second<<std::endl;
+//	}
+//	std::cout<<"Spearman based correlation"<<std::endl;
+	std::vector<std::pair<double,double> > corS = bs.computeSpearmanCorrelation();
+//	for (auto& element : corS){
+//		std::cout<<element.first<<" "<<element.second<<std::endl;
+//	}
+	std::cout<<"Start	End	Pearson	pValue	Spearman	pValue"<<std::endl;
+	for (unsigned int i=0; i<genomeConv.size();i++){
+		std::cout<<genomeConv[i].first<<"	"<<genomeConv[i].second<<"	"<<corP[i].first<<"	"<<corP[i].second<<"	"<<corS[i].first<<"	"<<corS[i].second<<std::endl;
 	}
-	std::cout<<"Spearman based correlation"<<std::endl;
-	std::vector<std::pair<double,double> > corS = bs.computeSpearmanCorrelation(expressionMapO);
-	for (auto& element : corS){
-		std::cout<<element.first<<" "<<element.second<<std::endl;
-	}
-
 	//Generate a txt file with DNase signal and gene expression across sample for the gene of interest including sample IDs and genomic location
           if (verbose){
-		std::cout<<SPIG<<std::endl;
+		std::cout<<gtf<<std::endl;
 		std::cout<<gsr<<std::endl;
 		std::cout<<expR<<std::endl;
-		std::cout<<gtf<<std::endl;
+		std::cout<<expO<<std::endl;
+		std::cout<<SPIG<<std::endl;	
+		std::cout<<bs<<std::endl;	
 	}
 	
 	return 0;
