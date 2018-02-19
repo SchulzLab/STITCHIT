@@ -31,7 +31,7 @@ int main(int argc, char *argv[]){
           const unsigned int window = 1000;
 	const unsigned int stepSize = 1;
 	const unsigned int maxCores = 3;
-	bool verbose = true;
+	bool verbose = false;
           //Loading genome size file
 	GenomeSizeReader gsr(genomeSizeFile);
 	gsr.loadGenomeSizeFile();
