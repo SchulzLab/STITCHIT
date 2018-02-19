@@ -37,7 +37,7 @@ TEST_F(SPANTest,setDat){
 	d_.setData(sig.getInputMatrix(),true,false,'g',1,false);
 	SPAN s_ = SPAN();
 	std::vector<std::pair<unsigned int, unsigned int> > resultVector = s_.runSpan(d_);
-	ASSERT_EQ(resultVector.size(),8);
+	ASSERT_EQ(resultVector.size(),9);
 }
 
 
