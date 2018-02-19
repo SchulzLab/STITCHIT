@@ -6,8 +6,8 @@
  * All of the structures here need to be destroyed or you'll leak memory! There are methods available to destroy anything that you need to take care of yourself.
  */
 
-//N.B., coordinates are still 0-based half open!
 /*!
+ * N.B., coordinates are still 0-based half open!
  * @brief A node within an R-tree holding the index for data.
  *
  * Note that there are two types of nodes: leaf and twig. Leaf nodes point to where data actually is. Twig nodes point to additional index nodes, which may or may not be leaves. Each of these nodes has additional children, which may span multiple chromosomes/contigs.
@@ -16,7 +16,6 @@
  */
 typedef struct bwRTreeNode_t {
     uint8_t isLeaf; /**<Is this node a leaf?*/
-    //1 byte of padding
     uint16_t nChildren; /**<The number of children of this node, all lists have this length.*/
     uint32_t *chrIdxStart; /**<A list of the starting chromosome indices of each child.*/
     uint32_t *baseStart; /**<A list of the start position of each child.*/
@@ -32,7 +31,6 @@ typedef struct bwRTreeNode_t {
 /*!
  * A header and index that points to an R-tree that in turn points to data blocks.
  */
-//TODO rootOffset is pointless, it's 48bytes after the indexOffset
 typedef struct {
     uint32_t blockSize; /**<The maximum number of children a node can have*/
     uint64_t nItems; /**<The total number of data blocks pointed to by the tree. This is completely redundant.*/
@@ -42,7 +40,6 @@ typedef struct {
     uint32_t baseEnd; /**<The last position on chrIdxEnd with an entry.*/
     uint64_t idxSize; /**<This is actually the offset of the index rather than the size?!? Yes, it's completely redundant.*/
     uint32_t nItemsPerSlot; /**<This is always 1!*/
-    //There's 4 bytes of padding in the file here
     uint64_t rootOffset; /**<The offset to the root node of the R-Tree (on disk). Yes, this is redundant.*/
     bwRTreeNode_t *root; /**<A pointer to the root node.*/
 } bwRTree_t;

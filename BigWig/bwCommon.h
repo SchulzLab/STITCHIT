@@ -56,10 +56,8 @@ void bwDestroyIndexNode(bwRTreeNode_t *node);
  */
 void bwDestroyIndex(bwRTree_t *idx);
 
-/// @cond SKIP
 bwOverlapBlock_t *walkRTreeNodes(bigWigFile_t *bw, bwRTreeNode_t *root, uint32_t tid, uint32_t start, uint32_t end);
 void destroyBWOverlapBlock(bwOverlapBlock_t *b);
-/// @endcond
 
 /*!
  * @brief Finishes what's needed to write a bigWigFile

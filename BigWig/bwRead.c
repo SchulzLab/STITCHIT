@@ -7,22 +7,17 @@
 
 static uint64_t readChromBlock(bigWigFile_t *bw, chromList_t *cl, uint32_t keySize);
 
-//Return the position in the file
 long bwTell(bigWigFile_t *fp) {
     if(fp->URL->type == BWG_FILE) return ftell(fp->URL->x.fp);
     return (long) (fp->URL->filePos + fp->URL->bufPos);
 }
 
-//Seek to a given position, always from the beginning of the file
-//Return 0 on success and -1 on error
-//To do, use the return code of urlSeek() in a more useful way.
 int bwSetPos(bigWigFile_t *fp, size_t pos) {
     CURLcode rv = urlSeek(fp->URL, pos);
     if(rv == CURLE_OK) return 0;
     return -1;
 }
 
-//returns the number of full members read (nmemb on success, something less on error)
 size_t bwRead(void *data, size_t sz, size_t nmemb, bigWigFile_t *fp) {
     size_t i, rv;
     for(i=0; i<nmemb; i++) {
@@ -32,14 +27,9 @@ size_t bwRead(void *data, size_t sz, size_t nmemb, bigWigFile_t *fp) {
     return nmemb;
 }
 
-//Initializes curl and sets global variables
-//Returns 0 on success and 1 on error
-//This should be called only once and bwCleanup() must be called when finished.
 int bwInit(size_t defaultBufSize) {
-    //set the buffer size, number of iterations, sleep time between iterations, etc.
     GLOBAL_DEFAULTBUFFERSIZE = defaultBufSize;
 
-    //call curl_global_init()
 #ifndef NOCURL
     CURLcode rv;
     rv = curl_global_init(CURL_GLOBAL_ALL);
@@ -48,7 +38,6 @@ int bwInit(size_t defaultBufSize) {
     return 0;
 }
 
-//This should be called before quiting, to release memory acquired by curl
 void bwCleanup() {
 #ifndef NOCURL
     curl_global_cleanup();
@@ -127,27 +116,25 @@ static void bwHdrRead(bigWigFile_t *bw) {
     bw->hdr = calloc(1, sizeof(bigWigHdr_t));
     if(!bw->hdr) return;
 
-    if(bwRead((void*) &magic, sizeof(uint32_t), 1, bw) != 1) goto error; //0x0
+    if(bwRead((void*) &magic, sizeof(uint32_t), 1, bw) != 1) goto error; 
     if(magic != BIGWIG_MAGIC && magic != BIGBED_MAGIC) goto error;
 
-    if(bwRead((void*) &(bw->hdr->version), sizeof(uint16_t), 1, bw) != 1) goto error; //0x4
-    if(bwRead((void*) &(bw->hdr->nLevels), sizeof(uint16_t), 1, bw) != 1) goto error; //0x6
-    if(bwRead((void*) &(bw->hdr->ctOffset), sizeof(uint64_t), 1, bw) != 1) goto error; //0x8
-    if(bwRead((void*) &(bw->hdr->dataOffset), sizeof(uint64_t), 1, bw) != 1) goto error; //0x10
-    if(bwRead((void*) &(bw->hdr->indexOffset), sizeof(uint64_t), 1, bw) != 1) goto error; //0x18
-    if(bwRead((void*) &(bw->hdr->fieldCount), sizeof(uint16_t), 1, bw) != 1) goto error; //0x20
-    if(bwRead((void*) &(bw->hdr->definedFieldCount), sizeof(uint16_t), 1, bw) != 1) goto error; //0x22
-    if(bwRead((void*) &(bw->hdr->sqlOffset), sizeof(uint64_t), 1, bw) != 1) goto error; //0x24
-    if(bwRead((void*) &(bw->hdr->summaryOffset), sizeof(uint64_t), 1, bw) != 1) goto error; //0x2c
-    if(bwRead((void*) &(bw->hdr->bufSize), sizeof(uint32_t), 1, bw) != 1) goto error; //0x34
-    if(bwRead((void*) &(bw->hdr->extensionOffset), sizeof(uint64_t), 1, bw) != 1) goto error; //0x38
+    if(bwRead((void*) &(bw->hdr->version), sizeof(uint16_t), 1, bw) != 1) goto error; 
+    if(bwRead((void*) &(bw->hdr->nLevels), sizeof(uint16_t), 1, bw) != 1) goto error; 
+    if(bwRead((void*) &(bw->hdr->ctOffset), sizeof(uint64_t), 1, bw) != 1) goto error; 
+    if(bwRead((void*) &(bw->hdr->dataOffset), sizeof(uint64_t), 1, bw) != 1) goto error;
+    if(bwRead((void*) &(bw->hdr->indexOffset), sizeof(uint64_t), 1, bw) != 1) goto error; 
+    if(bwRead((void*) &(bw->hdr->fieldCount), sizeof(uint16_t), 1, bw) != 1) goto error; 
+    if(bwRead((void*) &(bw->hdr->definedFieldCount), sizeof(uint16_t), 1, bw) != 1) goto error; 
+    if(bwRead((void*) &(bw->hdr->sqlOffset), sizeof(uint64_t), 1, bw) != 1) goto error; 
+    if(bwRead((void*) &(bw->hdr->summaryOffset), sizeof(uint64_t), 1, bw) != 1) goto error; 
+    if(bwRead((void*) &(bw->hdr->bufSize), sizeof(uint32_t), 1, bw) != 1) goto error; 
+    if(bwRead((void*) &(bw->hdr->extensionOffset), sizeof(uint64_t), 1, bw) != 1) goto error; 
 
-    //zoom headers
     if(bw->hdr->nLevels) {
         if(!(bw->hdr->zoomHdrs = bwReadZoomHdrs(bw))) goto error;
     }
 
-    //File summary information
     if(bw->hdr->summaryOffset) {
         if(urlSeek(bw->URL, bw->hdr->summaryOffset) != CURLE_OK) goto error;
         if(bwRead((void*) &(bw->hdr->nBasesCovered), sizeof(uint64_t), 1, bw) != 1) goto error;
@@ -157,7 +144,6 @@ static void bwHdrRead(bigWigFile_t *bw) {
         if(bwRead((void*) &(bw->hdr->sumSquared), sizeof(uint64_t), 1, bw) != 1) goto error;
     }
 
-    //In case of uncompressed remote files, let the IO functions know to request larger chunks
     bw->URL->isCompressed = (bw->hdr->bufSize > 0)?1:0;
 
     return;
@@ -232,7 +218,7 @@ static uint64_t readChromBlock(bigWigFile_t *bw, chromList_t *cl, uint32_t keySi
 
     if(isLeaf) {
         return readChromLeaf(bw, cl, keySize);
-    } else { //I've never actually observed one of these, which is good since they're pointless
+    } else {
         return readChromNonLeaf(bw, cl, keySize);
     }
 }
@@ -264,7 +250,6 @@ static chromList_t *bwReadChromList(bigWigFile_t *bw) {
     if(bwRead((void*) &magic, sizeof(uint32_t), 1, bw) != 1) goto error;
     if(bwRead((void*) &magic, sizeof(uint32_t), 1, bw) != 1) goto error;
 
-    //Read in the blocks
     rv = readChromBlock(bw, cl, keySize);
     if(rv == (uint64_t) -1) goto error;
     if(rv != itemCount) goto error;
@@ -276,7 +261,6 @@ error:
     return NULL;
 }
 
-//This is here mostly for convenience
 static void bwDestroyWriteBuffer(bwWriteBuffer_t *wb) {
     if(wb->p) free(wb->p);
     if(wb->compressP) free(wb->compressP);
@@ -316,7 +300,7 @@ char *bbGetSQL(bigWigFile_t *bw) {
     char *o = NULL;
     uint64_t len;
     if(!bw->hdr->sqlOffset) return NULL;
-    len = bw->hdr->summaryOffset - bw->hdr->sqlOffset; //This includes the NULL terminator
+    len = bw->hdr->summaryOffset - bw->hdr->sqlOffset; 
     o = malloc(sizeof(char) * len);
     if(!o) goto error;
     if(bwSetPos(bw, bw->hdr->sqlOffset)) goto error;
@@ -356,21 +340,18 @@ bigWigFile_t *bwOpen(char *fname, CURLcode (*callBack) (CURL*), const char *mode
             goto error;
         }
 
-        //Attempt to read in the fixed header
         bwHdrRead(bwg);
         if(!bwg->hdr) {
             fprintf(stderr, "[bwOpen] bwg->hdr is NULL!\n");
             goto error;
         }
 
-        //Read in the chromosome list
         bwg->cl = bwReadChromList(bwg);
         if(!bwg->cl) {
             fprintf(stderr, "[bwOpen] bwg->cl is NULL (%s)!\n", fname);
             goto error;
         }
 
-        //Read in the index
         if(bwg->hdr->nBasesCovered) {
             bwg->idx = bwReadIndex(bwg, 0);
             if(!bwg->idx) {
@@ -400,22 +381,17 @@ bigWigFile_t *bbOpen(char *fname, CURLcode (*callBack) (CURL*)) {
         fprintf(stderr, "[bbOpen] Couldn't allocate space to create the output object!\n");
         return NULL;
     }
-
-    //Set the type to 1 for bigBed
     bb->type = 1;
 
     bb->URL = urlOpen(fname, *callBack, NULL);
     if(!bb->URL) goto error;
 
-    //Attempt to read in the fixed header
     bwHdrRead(bb);
     if(!bb->hdr) goto error;
 
-    //Read in the chromosome list
     bb->cl = bwReadChromList(bb);
     if(!bb->cl) goto error;
 
-    //Read in the index
     bb->idx = bwReadIndex(bb, 0);
     if(!bb->idx) goto error;
 

@@ -21,7 +21,6 @@ uint64_t getContentLength(URL_t *URL) {
     return (uint64_t) size;
 }
 
-//Fill the buffer, note that URL may be left in an unusable state on error!
 CURLcode urlFetchData(URL_t *URL, unsigned long bufSize) {
     CURLcode rv;
     char range[1024];
@@ -29,7 +28,7 @@ CURLcode urlFetchData(URL_t *URL, unsigned long bufSize) {
     if(URL->filePos != (size_t) -1) URL->filePos += URL->bufLen;
     else URL->filePos = 0;
 
-    URL->bufPos = URL->bufLen = 0; //Otherwise, we can't copy anything into the buffer!
+    URL->bufPos = URL->bufLen = 0; 
     sprintf(range,"%lu-%lu", URL->filePos, URL->filePos+bufSize-1);
     rv = curl_easy_setopt(URL->x.curl, CURLOPT_RANGE, range);
     if(rv != CURLE_OK) {
@@ -38,12 +37,10 @@ CURLcode urlFetchData(URL_t *URL, unsigned long bufSize) {
     }
 
     rv = curl_easy_perform(URL->x.curl);
-    errno = 0; //Sometimes curl_easy_perform leaves a random errno remnant
+    errno = 0;
     return rv;
 }
 
-//Read data into a buffer, ideally from a buffer already in memory
-//The loop is likely no longer needed.
 size_t url_fread(void *obuf, size_t obufSize, URL_t *URL) {
     size_t remaining = obufSize, fetchSize;
     void *p = obuf;
@@ -56,7 +53,7 @@ size_t url_fread(void *obuf, size_t obufSize, URL_t *URL) {
                 fprintf(stderr, "[url_fread] urlFetchData (A) returned %s\n", curl_easy_strerror(rv));
                 return 0;
             }  
-        } else if(URL->bufLen < URL->bufPos + remaining) { //Copy the remaining buffer and reload the buffer as needed
+        } else if(URL->bufLen < URL->bufPos + remaining) { 
             p = memcpy(p, URL->memBuf+URL->bufPos, URL->bufLen - URL->bufPos);
             if(!p) return 0;
             p += URL->bufLen - URL->bufPos;
@@ -84,8 +81,6 @@ size_t url_fread(void *obuf, size_t obufSize, URL_t *URL) {
 }
 #endif
 
-//Returns the number of bytes requested or a smaller number on error
-//Note that in the case of remote files, the actual amount read may be less than the return value!
 size_t urlRead(URL_t *URL, void *buf, size_t bufSize) {
 #ifndef NOCURL
     if(URL->type==0) {
@@ -105,18 +100,16 @@ size_t bwFillBuffer(void *inBuf, size_t l, size_t nmemb, void *pURL) {
     if(!p) return 0;
 
     p += URL->bufLen;
-    if(l*nmemb > URL->bufSize - URL->bufPos) { //We received more than we can store!
+    if(l*nmemb > URL->bufSize - URL->bufPos) {
         copied = URL->bufSize - URL->bufLen;
     }
     memcpy(p, inBuf, copied);
     URL->bufLen += copied;
 
-    if(!URL->memBuf) return 0; //signal error
+    if(!URL->memBuf) return 0; 
     return copied;
 }
 
-//Seek to an arbitrary location, returning a CURLcode
-//Note that a local file returns CURLE_OK on success or CURLE_FAILED_INIT on any error;
 CURLcode urlSeek(URL_t *URL, size_t pos) {
 #ifndef NOCURL
     char range[1024];
@@ -128,16 +121,14 @@ CURLcode urlSeek(URL_t *URL, size_t pos) {
             errno = 0;
             return CURLE_OK;
         } else {
-            return CURLE_FAILED_INIT; //This is arbitrary
+            return CURLE_FAILED_INIT;
         }
 #ifndef NOCURL
     } else {
-        //If the location is covered by the buffer then don't seek!
         if(pos < URL->filePos || pos >= URL->filePos+URL->bufSize) {
             URL->filePos = pos;
-            URL->bufLen = 0; //Otherwise, filePos will get incremented on the next read!
+            URL->bufLen = 0; 
             URL->bufPos = 0;
-            //Maybe this works for FTP?
             sprintf(range,"%lu-%lu", pos, pos+URL->bufSize-1);
             rv = curl_easy_setopt(URL->x.curl, CURLOPT_RANGE, range);
             if(rv != CURLE_OK) {
@@ -148,7 +139,7 @@ CURLcode urlSeek(URL_t *URL, size_t pos) {
             if(rv != CURLE_OK) {
                 fprintf(stderr, "[urlSeek] curl_easy_perform received an error!\n");
             }
-            errno = 0;  //Don't propogate remnant resolved libCurl errors
+            errno = 0; 
             return rv;
         } else {
             URL->bufPos = pos-URL->filePos;
@@ -170,7 +161,6 @@ URL_t *urlOpen(char *fname, CURLcode (*callBack)(CURL*), const char *mode) {
     URL->fname = fname;
 
     if((!mode) || (strchr(mode, 'w') == 0)) {
-        //Set the protocol
 #ifndef NOCURL
         if(strncmp(fname, "http://", 7) == 0) URL->type = BWG_HTTP;
         else if(strncmp(fname, "https://", 8) == 0) URL->type = BWG_HTTPS;
@@ -180,9 +170,8 @@ URL_t *urlOpen(char *fname, CURLcode (*callBack)(CURL*), const char *mode) {
         URL->type = BWG_FILE;
 #endif
 
-        //local file?
         if(URL->type == BWG_FILE) {
-            URL->filePos = -1; //This signals that nothing has been read
+            URL->filePos = -1; 
             URL->x.fp = fopen(fname, "rb");
             if(!(URL->x.fp)) {
                 free(URL);
@@ -191,7 +180,6 @@ URL_t *urlOpen(char *fname, CURLcode (*callBack)(CURL*), const char *mode) {
             }
 #ifndef NOCURL
         } else {
-            //Remote file, set up the memory buffer and get CURL ready
             URL->memBuf = malloc(GLOBAL_DEFAULTBUFFERSIZE);
             if(!(URL->memBuf)) {
                 free(URL);
@@ -204,28 +192,23 @@ URL_t *urlOpen(char *fname, CURLcode (*callBack)(CURL*), const char *mode) {
                 fprintf(stderr, "[urlOpen] curl_easy_init() failed!\n");
                 goto error;
             }
-            //Negotiate a reasonable HTTP authentication method
             if(curl_easy_setopt(URL->x.curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY) != CURLE_OK) {
                 fprintf(stderr, "[urlOpen] Failed instructing curl to use any HTTP authentication it finds to be suitable!\n");
                 goto error;
             }
-            //Follow redirects
             if(curl_easy_setopt(URL->x.curl, CURLOPT_FOLLOWLOCATION, 1L) != CURLE_OK) {
                 fprintf(stderr, "[urlOpen] Failed instructing curl to follow redirects!\n");
                 goto error;
             }
-            //Set the URL
             if(curl_easy_setopt(URL->x.curl, CURLOPT_URL, fname) != CURLE_OK) {
                 fprintf(stderr, "[urlOpen] Couldn't set CURLOPT_URL!\n");
                 goto error;
             }
-            //Set the range, which doesn't do anything for HTTP
             sprintf(range, "0-%lu", URL->bufSize-1);
             if(curl_easy_setopt(URL->x.curl, CURLOPT_RANGE, range) != CURLE_OK) {
                 fprintf(stderr, "[urlOpen] Couldn't set CURLOPT_RANGE (%s)!\n", range);
                 goto error;
             }
-            //Set the callback info, which means we no longer need to directly deal with sockets and header!
             if(curl_easy_setopt(URL->x.curl, CURLOPT_WRITEFUNCTION, bwFillBuffer) != CURLE_OK) {
                 fprintf(stderr, "[urlOpen] Couldn't set CURLOPT_WRITEFUNCTION!\n");
                 goto error;
@@ -234,7 +217,6 @@ URL_t *urlOpen(char *fname, CURLcode (*callBack)(CURL*), const char *mode) {
                 fprintf(stderr, "[urlOpen] Couldn't set CURLOPT_WRITEDATA!\n");
                 goto error;
             }
-            //Ignore certificate errors with https, libcurl just isn't reliable enough with conda
             if(curl_easy_setopt(URL->x.curl, CURLOPT_SSL_VERIFYPEER, 0) != CURLE_OK) {
                 fprintf(stderr, "[urlOpen] Couldn't set CURLOPT_SSL_VERIFYPEER to 0!\n");
                 goto error;
@@ -251,7 +233,7 @@ URL_t *urlOpen(char *fname, CURLcode (*callBack)(CURL*), const char *mode) {
                 }
             }
             code = curl_easy_perform(URL->x.curl);
-            errno = 0; //Sometimes curl_easy_perform leaves a random errno remnant
+            errno = 0;
             if(code != CURLE_OK) {
                 fprintf(stderr, "[urlOpen] curl_easy_perform received an error: %s\n", curl_easy_strerror(code));
                 goto error;
@@ -282,7 +264,6 @@ error:
 #endif
 }
 
-//Performs the necessary free() operations and handles cleaning up curl
 void urlClose(URL_t *URL) {
     if(URL->type == BWG_FILE) {
         fclose(URL->x.fp);

@@ -106,7 +106,6 @@ enum bwStatsType {
     coverage = 4
 };
 
-//Should hide this from end users
 /*!
  * @brief BigWig files have multiple "zoom" levels, each of which has its own header. This hold those headers
  *
@@ -114,7 +113,6 @@ enum bwStatsType {
  */
 typedef struct {
     uint32_t *level; /**<The zoom level, which is an integer starting with 0.*/
-    //There's 4 bytes of padding between these
     uint64_t *dataOffset; /**<The offset to the on-disk start of the data. This isn't used currently.*/
     uint64_t *indexOffset; /**<The offset to the on-disk start of the index. This *is* used.*/
     bwRTree_t **idx; /**<Index for each zoom level. Represented as a tree*/
@@ -138,7 +136,6 @@ typedef struct {
     uint32_t bufSize; /**<The compression buffer size (if the data is compressed).*/
     uint64_t extensionOffset; /**<Unused*/
     bwZoomHdr_t *zoomHdrs; /**<Pointers to the header for each zoom level.*/
-    //total Summary
     uint64_t nBasesCovered; /**<The total bases covered in the file.*/
     double minVal; /**<The minimum value in the file.*/
     double maxVal; /**<The maximum value in the file.*/
@@ -146,7 +143,6 @@ typedef struct {
     double sumSquared; /**<The sum of the squared values in the file.*/
 } bigWigHdr_t;
 
-//Should probably replace this with a hash
 /*!
  * @brief Holds the chromosomes and their lengths
  */
@@ -156,20 +152,17 @@ typedef struct {
     uint32_t *len; /**<The lengths of each chromosome */
 } chromList_t;
 
-//TODO remove from bigWig.h
-/// @cond SKIP
 typedef struct bwLL bwLL;
 struct bwLL {
     bwRTreeNode_t *node;
     struct bwLL *next;
 };
 typedef struct bwZoomBuffer_t bwZoomBuffer_t;
-struct bwZoomBuffer_t { //each individual entry takes 32 bytes
+struct bwZoomBuffer_t { 
     void *p;
     uint32_t l, m;
     struct bwZoomBuffer_t *next;
 };
-/// @endcond
 
 /*!
  * @brief This is only needed for writing bigWig files (and won't be created otherwise)
@@ -468,7 +461,6 @@ double *bwStats(bigWigFile_t *fp, char *chrom, uint32_t start, uint32_t end, uin
 */
 double *bwStatsFromFull(bigWigFile_t *fp, char *chrom, uint32_t start, uint32_t end, uint32_t nBins, enum bwStatsType type);
 
-//Writer functions
 
 /*!
  * @brief Create a largely empty bigWig header
