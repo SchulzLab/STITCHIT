@@ -60,7 +60,7 @@ int main(int argc, char *argv[]){
 	std::vector<std::vector<double> > perBaseInputData;
 	perBaseInputData = SPIG.getInputMatrix();
 	Data input = Data();
-	input.setData(perBaseInputData,true,false,'g',stepSize,false);
+	input.setData(perBaseInputData,true,'g',stepSize,false);
 
 	//Feed input to SPAN and execute
 	std::cout<<"Segmentation in progress..."<<std::endl;

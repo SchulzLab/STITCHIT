@@ -10,35 +10,22 @@
 #include "Segment.h"
 
 Binning::Binning(Data& d, bool v){
-    data = d;
-    verbose = v;
-    // determine number of columns
-    length = d.n;
+	data = d;
+	verbose = v;
+	// determine number of columns
+	length = d.n;
 }
 
 double Binning::modelCost(int bins, int total){
-    assert(bins > 0);
-    double weightCutpoints = 0.0;
-    if(total == length)
-        weightCutpoints = S::log2nChoosek(total - 1, (bins - 1));
-    double w_bins = S::log2N(bins);
-    double means = 0.0;
-//    if(total == length) //temporarliy removed to increase the penalty in splitting steps.
-        means = 2 * bins * log2(std::abs(data.max - data.min) / (1.0 / (double) data.resolution));
-    return w_bins + means + weightCutpoints;
-}
-
-void Binning::printBlockLists(std::vector<S::block> B, std::vector<S::block> C){
-    std::cout << "B: ";
-    for (unsigned long i = 0; i < B.size(); i++) {
-        std::cout << B[i].position << ", ";
-    }
-    std::cout << "\n";
-    std::cout << "C: ";
-    for (unsigned long i = 0; i < C.size(); i++) {
-        std::cout << C[i].position << ", ";
-    }
-    std::cout << "\n";
+	assert(bins > 0);
+	double weightCutpoints = 0.0;
+	if(total == length)
+		weightCutpoints = S::log2nChoosek(total - 1, (bins - 1));
+	double w_bins = S::log2N(bins);
+	double means = 0.0;
+	if(total == length) 
+		means = data.categoryCount() * bins * log2(std::abs(data.max - data.min) / (1.0 / (double) data.resolution));
+	return w_bins + means + weightCutpoints;
 }
 
 
@@ -81,7 +68,6 @@ void Binning::applyDPFlexi(int kbins, Fraction* f){
     int fSize = f->size();
     // precompute weights
     S::weights w = data.precomputeWeightsGaussFast(f);
-    //S::weights w = data.precomputeWeightsSAEMap(seg);
     
     int depth = kbins <= 1 ? beta : std::min(kbins, beta);
     
@@ -160,42 +146,42 @@ void Binning::applyDPFlexi(int kbins, Fraction* f){
 }
 
 void Binning::runSPAN(int k, Fraction* fraction){
-    if(!fraction->merged){
+	if(!fraction->merged){
         // apply initial equal width binning if stepSize > 1; otw. every feature is in its own bin
-        std::vector<int> merge;
-        for(int i = fraction->start; i < fraction->end; i += fraction->stepSize){
-            merge.push_back(i);
-        }
-        int pos = 0;
-        S::interval actual;
-        for(int i = 0; i < (int) merge.size(); i++){
-            if (pos == 0) {
-                actual.start = merge[i];
-            }else{
-                actual.end = merge[i];
-            }
-            pos++;
-            if (pos == 2) {
-                pos = 1;
-                fraction->seg->push_back(actual);
-                actual.start = actual.end;
-            }
-        }
-        if((*(fraction->seg))[fraction->seg->size()-1].end != fraction->end){
-            actual.start = actual.end;
-            actual.end = fraction->end;
-            fraction->seg->push_back(actual);
-        }
-    } // if merged segments already exist
+		std::vector<int> merge;
+		for(int i = fraction->start; i < fraction->end; i += fraction->stepSize){
+			merge.push_back(i);
+		}
+		int pos = 0;
+		S::interval actual;
+		for(int i = 0; i < (int) merge.size(); i++){
+			if (pos == 0) {
+				actual.start = merge[i];
+			}else{
+				actual.end = merge[i];
+			}
+			pos++;
+			if (pos == 2) {
+				pos = 1;
+				fraction->seg->push_back(actual);
+				actual.start = actual.end;
+			}
+		}
+		if((*(fraction->seg))[fraction->seg->size()-1].end != fraction->end){
+			actual.start = actual.end;
+			actual.end = fraction->end;
+			fraction->seg->push_back(actual);
+		}
+	} // if merged segments already exist
     
-    bool autorun = k <= 1;
+	bool autorun = k <= 1;
 	if (verbose){
-    std::cout << "Segment-count before execution: " << fraction->seg->size() << " (initial step size=" << fraction->stepSize << ") \n";
-    if (autorun) {
-        std::cout << "--> Use MDL to select number of segments. \n";
-    } else {
-        std::cout << "--> Don't trust MDL and find k=" << k << " segments. \n";
-    }}
-    applyDPFlexi(k,fraction);
-//    printSegmentation(*(fraction->seg));
+		std::cout << "Segment-count before execution: " << fraction->seg->size() << " (initial step size=" << fraction->stepSize << ") \n";
+		if (autorun) {
+			std::cout << "--> Use MDL to select number of segments. \n";
+		} else {
+		std::cout << "--> Don't trust MDL and find k=" << k << " segments. \n";
+		}
+	}
+	applyDPFlexi(k,fraction);
 }

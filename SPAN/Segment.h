@@ -24,7 +24,6 @@ protected:
     Data data;
     bool verbose;
     
-    void printBlockLists(std::vector<S::block>, std::vector<S::block>);
     void applyDPFlexi(int, Fraction*);
     
     std::vector<int> Merge(std::vector<int>,std::vector<int>);

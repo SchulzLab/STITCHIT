@@ -2,37 +2,34 @@
 
 //Adapted version of the SPAN code from Alex which generates the binning and returns it as a vector of tupels
 std::vector<std::pair<unsigned int, unsigned int> > SPAN::runSpan(Data& d, int s = 1, unsigned int maxCores = 1,bool verbose = false){
-    int k = 0;
-    bool useClasses = true;
-    int parts = 1;
-    
-    //S::costfunptr ptr;
-    //ptr = gaussian;
-    Binning bins(d, verbose);
-    // set up fractions
-    std::vector<Fraction*> fractions;
-    parts=round(log2(d.n)); //Added by fschmidt
-    fractions.resize(parts); //Added by fschmidt
+	int k = 0;
+	int parts = 1;
+
+	Binning bins(d, verbose);
+	// set up fractions
+	std::vector<Fraction*> fractions;
+	parts=round(log2(d.n)); //Added by fschmidt
+	fractions.resize(parts); //Added by fschmidt
 	if (verbose){
-    std::cout<<"Spitting into "<<parts<<" subproblems"<<std::endl;
-}
-    if(parts > 1){
-        omp_set_num_threads(fmin(parts,maxCores)); //Added by fschmidt
-        int stdwidth = floor((double)d.n / (double)parts);
-        #pragma omp parallel for
-        for(int i = 0; i < parts; i++){
-            int begin = i * stdwidth;
-            int end = i == (parts-1) ? d.n : (i+1) * stdwidth;
-            Fraction* f = new Fraction(begin, end, s, useClasses);
-            bins.runSPAN(k, f);
-  	  //fractions.push_back(f);
-	  fractions[i]=f; //Added by fschmidt
-    }
-   }
+		std::cout<<"Spitting into "<<parts<<" subproblems"<<std::endl;
+	}	
+	if(parts > 1){
+		omp_set_num_threads(fmin(parts,maxCores)); //Added by fschmidt
+		int stdwidth = floor((double)d.n / (double)parts);
+		#pragma omp parallel for
+		for(int i = 0; i < parts; i++){
+			int begin = i * stdwidth;
+			int end = i == (parts-1) ? d.n : (i+1) * stdwidth;
+			Fraction* f = new Fraction(begin, end, s, d.getCategories());
+			bins.runSPAN(k, f);
+	  		fractions[i]=f; //Added by fschmidt
+		}
+	}
 	
 	if (verbose){
 	std::cout<<"Merging into a second layer"<<std::endl;
 	}
+	
 	//Test if a second division layer to merge smaller cluster improves the required time.
 	std::vector<Fraction*> second_layer;
 	Fraction* current = NULL;
@@ -47,9 +44,10 @@ std::vector<std::pair<unsigned int, unsigned int> > SPAN::runSpan(Data& d, int s
 		}
 	}
 	second_layer.push_back(current);  // last element
+	
 	if (verbose){
-	std::cout<<"Second layer filled with "<<second_layer.size()<<std::endl;
-}
+		std::cout<<"Second layer filled with "<<second_layer.size()<<std::endl;
+	}
 	// algorithmus ausführen
 	#pragma omp parallel for
 	for(unsigned int i = 0; i < second_layer.size(); i++){
@@ -57,29 +55,30 @@ std::vector<std::pair<unsigned int, unsigned int> > SPAN::runSpan(Data& d, int s
 	}
 
 	if (verbose){
-	std::cout<<"Merging results of second layer"<<std::endl;
-}
-        Fraction* fAll = second_layer.size() > 1 ? second_layer[0] : new Fraction(0, d.n, s, useClasses);
-    for(unsigned int i = 1; i < second_layer.size(); i++){
-        fAll->mergeIn(second_layer[i]);
-    }
-    //END second division layer
+		std::cout<<"Merging results of second layer"<<std::endl;
+	}
+	
+	Fraction* fAll = second_layer.size() > 1 ? second_layer[0] : new Fraction(0, d.n, s, d.getCategories());
+	for(unsigned int i = 1; i < second_layer.size(); i++){
+		fAll->mergeIn(second_layer[i]);
+	}
+	//END second division layer
 
-   //Generate vector of tupels holding final binning
-   // run last run
-    bins.runSPAN(k, fAll);
+	//Generate vector of tupels holding final binning
+	//run last run
+	bins.runSPAN(k, fAll);
 	
 	std::vector<std::pair<unsigned int, unsigned int> > resultVector;
 	for(unsigned int i = 0; i < fAll->seg->size(); i++){
  		resultVector.push_back(std::make_pair((*(fAll->seg))[i].start + 1,(*(fAll->seg))[i].end));
  	}
+	
 
-    if(parts > 1){
-        for(int i = 0; i < parts; i++){
-            delete fractions[i];
-        }
-    }
-
+	if(parts > 1){
+		for(int i = 0; i < parts; i++){
+			delete fractions[i];
+		}
+	}
 	return resultVector;
 }
 

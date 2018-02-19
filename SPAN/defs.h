@@ -9,36 +9,6 @@ namespace S {
     typedef std::vector< std::vector<double> > matrix;
     typedef double (*costfunptr)(double,double);
     
-    // define a block
-    struct block {
-        int position;
-        int initialfr;
-        int points;
-        int elems;
-        double p_sum;
-        void init(double psum, int i) {
-            points = 1;
-            elems = 0;
-            p_sum = psum;
-            initialfr = psum;
-            position = i;
-        }
-        bool extend(block b){
-            if(b.elems != 0){
-                return false;
-            }else{
-                elems++;
-                int factor = (1 << elems);
-                points += factor;
-                p_sum += (b.p_sum * factor);
-                return true;
-            }
-        }
-        double fr(){
-            return points > 0 ? p_sum / (double) points : 0;
-        }
-    };
-    
     // define return interval, whereas [start, end)
     struct interval {
         int start, end;

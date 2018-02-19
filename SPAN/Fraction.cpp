@@ -3,16 +3,18 @@
 #include <cmath>
 #include <assert.h>
 
-Fraction::Fraction(int s, int e, int sS, bool b){
+Fraction::Fraction(int s, int e, int sS, std::set<int> cat){
     assert(s < e);
     start = s;
     end = e;
-    binary = b;
     stepSize = sS;
-    sse1 = new std::vector<double>();
-    se1 = new std::vector<double>();
-    sse0 = new std::vector<double>();
-    se0 = new std::vector<double>();
+    categories = cat;
+    std::set<int>::iterator it;
+    for(it = categories.begin(); it != categories.end(); ++it){
+        int label = *it;
+        sse[label]  = new std::vector<double>();
+        se[label]   = new std::vector<double>();
+    }
     seg = new S::segmentation();
     // true after first iteration -- don't calculate costs or initial costs again
     weightsSet = false;
@@ -20,10 +22,12 @@ Fraction::Fraction(int s, int e, int sS, bool b){
 }
 
 Fraction::~Fraction(){
-    delete sse1;
-    delete sse0;
-    delete se1;
-    delete se0;
+    std::set<int>::iterator it;
+    for(it = categories.begin(); it != categories.end(); ++it){
+        int label = *it;
+        delete sse[label];
+        delete se[label];
+    }
     delete seg;
 }
 
@@ -36,49 +40,48 @@ void Fraction::mergeIn(Fraction* f){
         for(unsigned int i = 0; i < f->seg->size(); i++){
             seg->insert(seg->begin(), (*f->seg)[i]);
             // shift because of zero in beginning
-            sse1->insert(sse1->begin() + 1, (*(f->sse1))[(i+1)]);
-            se1->insert(se1->begin() + 1, (*(f->se1))[(i+1)]);
-            if(binary){
-                sse0->insert(sse0->begin() + 1, (*(f->sse0))[(i+1)]);
-                se0->insert(se0->begin() + 1, (*(f->se0))[(i+1)]);
+            std::set<int>::iterator it;
+            for (it = categories.begin(); it != categories.end(); ++it){
+                int label = *it;
+                sse[label]->insert(sse[label]->begin() + 1, (*(f->sse[label]))[(i+1)]);
+                se[label]->insert(se[label]->begin() + 1, (*(f->se[label]))[(i+1)]);
             }
         }
         // add increased sum to old ones
-        double sse1_max = (*(f->sse1))[f->sse1->size() - 1];
-        double se1_max = (*(f->se1))[f->se1->size() - 1];
-        double sse0_max = 0.0;
-        double se0_max = 0.0;
-        if(binary){
-            sse0_max = (*(f->sse0))[f->sse0->size() - 1];
-            se0_max = (*(f->se0))[f->se0->size() - 1];
+        simplemap maxsse;
+        simplemap maxse;
+        std::set<int>::iterator it;
+        for(it = categories.begin(); it != categories.end(); ++it){
+            int label = *it;
+            maxsse[label] = (*(f->sse[label]))[f->sse[label]->size() - 1];
+            maxse[label] = (*(f->se[label]))[f->se[label]->size() - 1];
         }
-        for(unsigned int i = f->sse1->size(); i < sse1->size(); i++){
-            (*sse1)[i] += sse1_max;
-            (*se1)[i] += se1_max;
-            if(binary){
-                (*sse0)[i] += sse0_max;
-                (*se0)[i] += se0_max;
+        for(unsigned int i = f->sse[1]->size(); i < sse[1]->size(); i++){
+            std::set<int>::iterator it;
+            for(it = categories.begin(); it != categories.end(); ++it){
+                int label = *it;
+                (*(sse[label]))[i] += maxsse[label];
+                (*(se[label]))[i] += maxse[label];
             }
         }
     }else{
         assert(end == f->start);
         end = f->end;
-        double sse1_max = (*sse1)[sse1->size() - 1];
-        double se1_max = (*se1)[se1->size() - 1];
-        double sse0_max = 0.0;
-        double se0_max = 0.0;
-        if(binary){
-            sse0_max = (*sse0)[sse0->size() - 1];
-            se0_max = (*se0)[se0->size() - 1];
+        simplemap maxsse;
+        simplemap maxse;
+        std::set<int>::iterator it;
+        for(it = categories.begin(); it != categories.end(); ++it){
+            int label = *it;
+            maxsse[label] = (*(sse[label]))[sse[label]->size() - 1];
+            maxse[label] = (*(se[label]))[se[label]->size() - 1];
         }
         for(unsigned int i = 0; i < f->seg->size(); i++){
             seg->push_back((*(f->seg))[i]);
-            
-            sse1->push_back((*(f->sse1))[i+1] + sse1_max);
-            se1->push_back((*(f->se1))[i+1] + se1_max);
-            if(binary){
-                sse0->push_back((*(f->sse0))[i+1] + sse0_max);
-                se0->push_back((*(f->se0))[i+1] + se0_max);
+            std::set<int>::iterator it;
+            for(it = categories.begin(); it != categories.end(); ++it){
+                int label = *it;
+                sse[label]->push_back((*(f->sse[label]))[i+1] + maxsse[label]);
+                se[label]->push_back((*(f->se[label]))[i+1] + maxse[label]);
             }
         }
     }
@@ -103,12 +106,12 @@ void Fraction::updateSegmentation(S::segmentation s){
 }
 
 void Fraction::adjustErrors(std::vector<int> toDelete){
-    if((sse1->size() - 1) != seg->size()){
-        cutItOff(sse1, toDelete);
-        cutItOff(se1, toDelete);
-        if(binary){
-            cutItOff(sse0, toDelete);
-            cutItOff(se0, toDelete);
+    if((sse[1]->size() - 1) != seg->size()){
+        std::set<int>::iterator it;
+        for(it = categories.begin(); it != categories.end(); ++it){
+            int label = *it;
+            cutItOff(sse[label], toDelete);
+            cutItOff(se[label], toDelete);
         }
     }
 }

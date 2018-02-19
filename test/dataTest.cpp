@@ -18,22 +18,22 @@ class DATATest : public ::testing::Test{
 };
 
 TEST_F(DATATest, ReadInput){
-          d_.read_file(TEST_DATA_PATH("Integrated_featureMatrix_ENSG00000107581_5000.tab"),true,false,'g',1,false);
+          d_.read_file(TEST_DATA_PATH("Integrated_featureMatrix_ENSG00000107581_5000.tab"),true,'g',1,false);
 	SUCCEED();
 }
 
 TEST_F(DATATest, checkRowCount){
-          d_.read_file(TEST_DATA_PATH("Integrated_featureMatrix_ENSG00000107581_5000.tab"),true,false,'g',1,false);
+          d_.read_file(TEST_DATA_PATH("Integrated_featureMatrix_ENSG00000107581_5000.tab"),true,'g',1,false);
 	ASSERT_EQ(d_.getRowCount(),60);
 }
 
 TEST_F(DATATest, checkColCount){
-          d_.read_file(TEST_DATA_PATH("Integrated_featureMatrix_ENSG00000107581_5000.tab"),true,false,'g',1,false);
+          d_.read_file(TEST_DATA_PATH("Integrated_featureMatrix_ENSG00000107581_5000.tab"),true,'g',1,false);
 	ASSERT_EQ(d_.getColCount(),5001);
 }
 
 TEST_F(DATATest, getElement){
-          d_.read_file(TEST_DATA_PATH("Integrated_featureMatrix_ENSG00000107581_5000.tab"),true,false,'g',1,false);
+          d_.read_file(TEST_DATA_PATH("Integrated_featureMatrix_ENSG00000107581_5000.tab"),true,'g',1,false);
 	ASSERT_EQ(d_.getElement(0,0),1);
 	ASSERT_EQ(d_.getElement(1,0),0);
 	ASSERT_EQ(d_.getElement(11,0),56.2);
@@ -51,9 +51,10 @@ TEST_F(DATATest,setDat){
           std::vector<std::string> sampleNames = sig.getSampleNames();
           std::vector<std::vector<double>> inputMatrix =sig.getInputMatrix();
           std::vector<double> dataVector={0,0,0,0,0,0,0,0,0,0,10,10,10,10,10,20,20,20,20,20,10,10,10,10,10,0,0,0,0,0};
-	d_.setData(sig.getInputMatrix(),true,false,'g',1,false);
+	d_.setData(sig.getInputMatrix(),true,'g',1,false);
 	ASSERT_EQ(d_.getRowCount(),4);
           ASSERT_EQ(d_.getColCount(),30);
           ASSERT_EQ(d_.getRow(std::find(sampleNames.begin(),sampleNames.end(),"B_S00CWT11")-sampleNames.begin()),dataVector);
+	ASSERT_EQ(d_.categoryCount(),2);
 }
 
