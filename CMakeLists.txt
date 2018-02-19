@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-add_definitions(-Wall -pedantic -fopenmp -O3)
+add_compile_options(-Wall -pedantic -fopenmp -O3)
 
 find_package(Boost  REQUIRED COMPONENTS system filesystem)
 include_directories(${Boost_INCLUDE_DIR})
