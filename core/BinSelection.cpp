@@ -113,17 +113,47 @@ std::vector<std::string>& BinSelection::getSampleNames(){
  * @param
  */
 std::ostream& operator<<(std::ostream& os, const BinSelection& r){
-	unsigned int numSeg = r.meanSignal_[0].size();
+	unsigned int numSam = r.meanSignal_.size();
 	std::vector<double> expVecTemp;
 	for (auto& sample : r.sampleNames_){
 		expVecTemp.push_back(r.expressionMap_[sample]);
 	}
-	for (unsigned int seg = 0; seg < numSeg; seg++){
-		os << r.sampleNames_[seg];
-		for (double element : r.meanSignal_[seg]){
+	for (unsigned int sam = 0; sam < numSam; sam++){
+		os << r.sampleNames_[sam];
+		for (double element : r.meanSignal_[sam]){
 			os << "	" << element;
 		}	
-		os <<"	"<< expVecTemp[seg]<< std::endl;
+	os <<"	"<< expVecTemp[sam]<< '\n';
 	}
 	return os;
 }
+
+void BinSelection::storeSignificantSignal(const std::string& filename, float threshold, std::vector<std::pair<double,double> > correlation,  std::vector<std::pair<unsigned int, unsigned int> > intervalPosition){
+	unsigned int numSam = meanSignal_.size();
+	std::vector<double> expVecTemp;
+	for (auto& sample : sampleNames_){
+		expVecTemp.push_back(expressionMap_[sample]);
+	}
+	std::ofstream outfile;
+	outfile.open(filename);	
+	std::vector<unsigned int> validIndex;
+	for (unsigned int index = 0; index< correlation.size(); index++){
+		if (correlation[index].second <= threshold){
+			validIndex.push_back(index);
+		}
+	}
+	outfile<<"\t";
+	for (auto& item : validIndex){
+		outfile <<"Seg_"<< intervalPosition[item].first << "_"<<intervalPosition[item].second<<"\t";
+	}
+	outfile<<"Expression\n";
+	for (unsigned int sam = 0; sam < numSam; sam++){
+		outfile << sampleNames_[sam];
+		for (auto& item : validIndex){
+			outfile << "\t" <<  meanSignal_[sam][item];
+		}	
+	outfile <<"\t"<< expVecTemp[sam]<< '\n';
+	}
+	outfile.close();
+}
+	

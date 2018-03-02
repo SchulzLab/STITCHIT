@@ -151,9 +151,9 @@ int main(int argc, char *argv[]){
 		std::cout<<genomeConv[i].first<<"	"<<genomeConv[i].second<<"	"<<corP[i].first<<"	"<<corP[i].second<<"	"<<corS[i].first<<"	"<<corS[i].second<<std::endl;
 	}
 
-	//Generate a txt file with DNase signal and gene expression across samples for the gene of interest in the significant segments including sample IDs and genomic location
-
-
+	bs.storeSignificantSignal("Segmentation_"+geneID+".txt",0.05,corP,genomeConv);
+	//Generate a txt file with DNase-seq signal and gene expression across samples for the gene of interest in the significant segments including sample IDs and genomic location
+	std::cout<<bs<<std::endl;
           if (verbose){
 		std::cout<<gtf<<std::endl;
 		std::cout<<gsr<<std::endl;
