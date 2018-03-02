@@ -11,7 +11,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_compile_options(-Wall -pedantic -fopenmp -O3)
 
-find_package(Boost  REQUIRED COMPONENTS system filesystem)
+find_package(Boost  REQUIRED COMPONENTS system filesystem program_options)
 include_directories(${Boost_INCLUDE_DIR})
 
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)

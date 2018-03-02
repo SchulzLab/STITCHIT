@@ -26,7 +26,7 @@ void GTFReader::findGenomicLocation(const std::string& targetGeneID){
 	while(!annotationFile.eof()){
 		std::getline(annotationFile,temp);
 		std::stringstream ss(temp); // Insert the string into a stream
-		if (temp != ""){
+		if ((temp != "") and (temp[0] !='#')){
 			if (ss >> chromosome >> buf >> buf){
 				if (buf == "gene"){
 					if (ss >> pos1 >> pos2 >> buf >> strand >> buf >> buf >> geneID){

@@ -5,6 +5,10 @@
 #include "BinSelection.h"
 #include "../SPAN/Data.h"
 #include "../SPAN/Span.h"
+#include "boost/program_options/options_description.hpp"
+#include "boost/program_options/variables_map.hpp"
+#include "boost/program_options/parsers.hpp"
+
 /*
 argv1 path to bigwig (bw) files
 argv2 gene annotation in gencode format
@@ -15,23 +19,80 @@ argv5 genome size file
 
 int main(int argc, char *argv[]){
           //Check the provided arguments
-          if(argc != 7) {
-                    std::cerr<<"Incorrect number of parameters. Usage:"<<std::endl;
-                    std::cerr<<"<Path to bigwig files> <Gene annotation file in gencode format> <geneID> <Discretised gene expression matrix> <Original gene expression matrix> <Genome size file>"<<std::endl;
-                    return 1;
-          }
-
+	
           //storing command args in self explanatory variables for better readability
-          const std::string bigWigPath = argv[1];
-          const std::string annotationFile = argv[2];
-          const std::string geneID = argv[3];
-          const std::string expressionDiscretised = argv[4];
-          const std::string expressionOriginal = argv[5];
-	const std::string genomeSizeFile = argv[6];
-          const unsigned int window = 1000;
-	const unsigned int stepSize = 1;
-	const unsigned int maxCores = 3;
-	bool verbose = false;
+          std::string bigWigPath;
+          std::string annotationFile;
+          std::string geneID;
+          std::string expressionDiscretised;
+          std::string expressionOriginal;
+	std::string genomeSizeFile;
+	unsigned int window;
+	unsigned int stepSize;
+	unsigned int maxCores;
+	float pvalue;
+	bool verbose;
+	
+	boost::program_options::options_description desc("STITCH options");
+	desc.add_options()
+		("help","Show help message")
+		("bigWigPath,b", boost::program_options::value<std::string>(&bigWigPath), "Path to big wig files")
+		("annotationFile,a",boost::program_options::value<std::string>(&annotationFile), "Path to the annotation file that should be used")
+		("geneID,g",boost::program_options::value<std::string>(&geneID), "ID of the gene that should be segmented")
+		("expressionDiscretised,d",boost::program_options::value<std::string>(&expressionDiscretised), "File containing the discretised expression information")
+		("expressionOriginal,o",boost::program_options::value<std::string>(&expressionOriginal), "File containng the original expression information")
+		("genomeSizeFile,s",boost::program_options::value<std::string>(&genomeSizeFile), "File containig the size of the chromosomes of the reference genome")
+		("window,w",boost::program_options::value<unsigned int>(&window)->default_value(5000), "Size of the window considered upstream and downstream of the gene body")
+		("stepSize,z",boost::program_options::value<unsigned int>(&stepSize)->default_value(1), "Resolution parameter used by SPAN to merge the initial binning")
+		("cores,c", boost::program_options::value<unsigned int>(&maxCores)->default_value(2), "Number of cores to be used for the computation")
+		("pvalue,p",boost::program_options::value<float>(&pvalue)->default_value(0.05),"Signifcance level for the correlation of a segment to be considered in the output")
+		("verbose,v", boost::program_options::value<bool>(&verbose)->default_value(false), "True if additional status reports should be generated, false otherwise")
+	;
+	
+	boost::program_options::variables_map vm;
+	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
+	boost::program_options::notify(vm);
+
+	if (argc == 1){
+		std::cout<<desc<<std::endl;
+		return 1;
+	}
+
+	if (vm.count("help")){
+		std::cout<<desc<<std::endl;
+		return 1;
+	}
+
+	if (not(vm.count("bigWigPath"))){
+		std::cout<<"--bigWigPath is not specified. Please provide the path to a folder containing one big wig file per sample"<<std::endl;;		
+		return 1;
+	}
+
+	if (not(vm.count("annotationFile"))){
+		std::cout<<"--annotationFile is not specified. Please provide the path to a gene annotation file in gtf format"<<std::endl;;		
+		return 1;
+	}
+
+	if (not(vm.count("geneID"))){
+		std::cout<<"--geneID is not specified. Please provide the geneID of the gene that should be segmented."<<std::endl;;		
+		return 1;
+	}
+
+	if (not(vm.count("expressionDiscretised"))){
+		std::cout<<"--expressionDiscretised is not specified. Please provide the path to a file containing discretised expression data with genes in the rows and samples in the columns. Note that multiclass classification is supported."<<std::endl;;		
+		return 1;
+	}
+
+	if (not(vm.count("expressionOriginal"))){
+		std::cout<<"--expressionOriginal is not specified. Please provide the path to a folder containing one big wig file per sample"<<std::endl;;		
+		return 1;
+	}
+
+	if (not(vm.count("genomeSizeFile"))){
+		std::cout<<"--genomeSizeFile is not specified. Please provide a file holding the total length per chromosome."<<std::endl;;		
+		return 1;
+	}
+
           //Loading genome size file
 	GenomeSizeReader gsr(genomeSizeFile);
 	gsr.loadGenomeSizeFile();
@@ -44,7 +105,7 @@ int main(int argc, char *argv[]){
 	gtf.findGenomicLocation(geneID);
 	std::tuple<std::string, unsigned int, unsigned int,std::string> genomicCoordinates;
 	genomicCoordinates = gtf.getGenomicLocation();
-	std::cout<<"Coordinates found: "<<std::get<0>(genomicCoordinates)<<" "<<std::get<1>(genomicCoordinates)+window<<" "<<std::get<2>(genomicCoordinates)-window<<",gene length: "<<std::get<2>(genomicCoordinates)-std::get<1>(genomicCoordinates)<<std::endl;
+	std::cout<<"Coordinates found: "<<std::get<0>(genomicCoordinates)<<" "<<std::get<1>(genomicCoordinates)+window<<" "<<std::get<2>(genomicCoordinates)-window<<", gene length: "<<std::get<2>(genomicCoordinates)-std::get<1>(genomicCoordinates)<<std::endl;
 	
           //Generating expression map
 	std::cout<<"Extracting discretised gene expression information for "<<geneID<<std::endl;
@@ -70,15 +131,6 @@ int main(int argc, char *argv[]){
 	std::vector<std::pair<unsigned int, unsigned int> > genomeConv= sp.convertSegmentationToGenomicCoordinates(segments,genomicCoordinates);
 	
 	std::cout<<"Segmentation into "<<segments.size()<<" bins completed."<<std::endl;
-	//Print binning
-	//	for (auto& element : segments){
-	//		std::cout<<"["<<element.first<<","<<element.second<<")"<<std::endl;
-	//	}
-
-	//Print binning
-//	for (auto& element : genomeConv){
-//		std::cout<<"["<<element.first<<","<<element.second<<"]"<<std::endl;
-//	}
 
 	//Loading original gene expression data
 	std::cout<<"Extracting original gene expression information for "<<geneID<<std::endl;
@@ -93,20 +145,15 @@ int main(int argc, char *argv[]){
 	std::cout<<"Computing correlation between signal and gene expression"<<std::endl;
 	//Assess correlation of signal in bins to gene expression
 	std::vector<std::pair<double,double> > corP = bs.computePearsonCorrelation();
-//	std::cout<<"Pearson based correlation"<<std::endl;
-//	for (auto& element : corP){
-//		std::cout<<element.first<<" "<<element.second<<std::endl;
-//	}
-//	std::cout<<"Spearman based correlation"<<std::endl;
 	std::vector<std::pair<double,double> > corS = bs.computeSpearmanCorrelation();
-//	for (auto& element : corS){
-//		std::cout<<element.first<<" "<<element.second<<std::endl;
-//	}
 	std::cout<<"Start	End	Pearson	pValue	Spearman	pValue"<<std::endl;
 	for (unsigned int i=0; i<genomeConv.size();i++){
 		std::cout<<genomeConv[i].first<<"	"<<genomeConv[i].second<<"	"<<corP[i].first<<"	"<<corP[i].second<<"	"<<corS[i].first<<"	"<<corS[i].second<<std::endl;
 	}
-	//Generate a txt file with DNase signal and gene expression across sample for the gene of interest including sample IDs and genomic location
+
+	//Generate a txt file with DNase signal and gene expression across samples for the gene of interest in the significant segments including sample IDs and genomic location
+
+
           if (verbose){
 		std::cout<<gtf<<std::endl;
 		std::cout<<gsr<<std::endl;
