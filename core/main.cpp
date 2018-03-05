@@ -47,7 +47,7 @@ int main(int argc, char *argv[]){
 		("stepSize,z",boost::program_options::value<unsigned int>(&stepSize)->default_value(1), "Resolution parameter used by SPAN to merge the initial binning")
 		("cores,c", boost::program_options::value<unsigned int>(&maxCores)->default_value(2), "Number of cores to be used for the computation")
 		("pvalue,p",boost::program_options::value<float>(&pvalue)->default_value(0.05),"Signifcance level for the correlation of a segment to be considered in the output")
-		("correlationMeasure,m",boost::program_options::value<std::string>(&corM)->default_value("Pearson"),"Method used to compute correlation between expression and epigenetic signal. Can be Pearson(default) or Spearman")
+		("correlationMeasure,m",boost::program_options::value<std::string>(&corM)->default_value("Both"),"Method used to compute correlation between expression and epigenetic signal. Can be Both (default), Pearson, or Spearman")
 		("verbose,v", boost::program_options::value<bool>(&verbose)->default_value(false), "True if additional status reports should be generated, false otherwise")
 	;
 	
@@ -96,8 +96,8 @@ int main(int argc, char *argv[]){
 	}
 
 	if (vm.count("correlationMeasure")){
-		if ((corM != "Pearson") and (corM != "Spearman")){
-			std::cout<<"Please specify a valid correlation measure: Pearson or Spearman"<<std::endl;;		
+		if ((corM != "Pearson") and (corM != "Spearman") and (corM != "Both")){
+			std::cout<<"Please specify a valid correlation measure: Both, Pearson or Spearman"<<std::endl;;		
 			return 1;
 		}
 	}
@@ -161,10 +161,15 @@ int main(int argc, char *argv[]){
 	}
 
 	//Generate a txt file with DNase-seq signal and gene expression across samples for the gene of interest in the significant segments including sample IDs and genomic location
-	if (corM=="Pearson"){
-		bs.storeSignificantSignal("Segmentation_"+geneID+"_"+corM+".txt", pvalue, corP, genomeConv, genomicCoordinates);
+	if (corM=="Both"){
+		bs.storeSignificantSignal("Segmentation_"+geneID+"_Pearson.txt", pvalue, corP, genomeConv, genomicCoordinates);
+		bs.storeSignificantSignal("Segmentation_"+geneID+"_Spearman.txt", pvalue, corS, genomeConv, genomicCoordinates);
 	}else{
-		bs.storeSignificantSignal("Segmentation_"+geneID+"_"+corM+".txt", pvalue, corS, genomeConv, genomicCoordinates);
+		if (corM=="Spearman"){
+			bs.storeSignificantSignal("Segmentation_"+geneID+"_"+corM+".txt", pvalue, corS, genomeConv, genomicCoordinates);
+		}else{
+			bs.storeSignificantSignal("Segmentation_"+geneID+"_"+corM+".txt", pvalue, corP, genomeConv, genomicCoordinates);
+		}
 	}
           if (verbose){
 		std::cout<<gtf<<std::endl;
