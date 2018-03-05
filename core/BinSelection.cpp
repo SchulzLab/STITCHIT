@@ -128,7 +128,7 @@ std::ostream& operator<<(std::ostream& os, const BinSelection& r){
 	return os;
 }
 
-void BinSelection::storeSignificantSignal(const std::string& filename, float threshold, std::vector<std::pair<double,double> > correlation,  std::vector<std::pair<unsigned int, unsigned int> > intervalPosition){
+void BinSelection::storeSignificantSignal(const std::string& filename, float threshold, std::vector<std::pair<double,double> > correlation,  std::vector<std::pair<unsigned int, unsigned int> > intervalPosition,std::tuple<std::string, unsigned int, unsigned int,std::string> genomePos){
 	unsigned int numSam = meanSignal_.size();
 	std::vector<double> expVecTemp;
 	for (auto& sample : sampleNames_){
@@ -144,7 +144,7 @@ void BinSelection::storeSignificantSignal(const std::string& filename, float thr
 	}
 	outfile<<"\t";
 	for (auto& item : validIndex){
-		outfile <<"Seg_"<< intervalPosition[item].first << "_"<<intervalPosition[item].second<<"\t";
+		outfile <<std::get<0>(genomePos)<<":"<<intervalPosition[item].first << "-" <<intervalPosition[item].second<<"\t";
 	}
 	outfile<<"Expression\n";
 	for (unsigned int sam = 0; sam < numSam; sam++){
