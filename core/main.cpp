@@ -27,6 +27,7 @@ int main(int argc, char *argv[]){
           std::string expressionDiscretised;
           std::string expressionOriginal;
 	std::string genomeSizeFile;
+	std::string corM;
 	unsigned int window;
 	unsigned int stepSize;
 	unsigned int maxCores;
@@ -46,6 +47,7 @@ int main(int argc, char *argv[]){
 		("stepSize,z",boost::program_options::value<unsigned int>(&stepSize)->default_value(1), "Resolution parameter used by SPAN to merge the initial binning")
 		("cores,c", boost::program_options::value<unsigned int>(&maxCores)->default_value(2), "Number of cores to be used for the computation")
 		("pvalue,p",boost::program_options::value<float>(&pvalue)->default_value(0.05),"Signifcance level for the correlation of a segment to be considered in the output")
+		("correlationMeasure,m",boost::program_options::value<std::string>(&corM)->default_value("Pearson"),"Method used to compute correlation between expression and epigenetic signal. Can be Pearson(default) or Spearman")
 		("verbose,v", boost::program_options::value<bool>(&verbose)->default_value(false), "True if additional status reports should be generated, false otherwise")
 	;
 	
@@ -91,6 +93,13 @@ int main(int argc, char *argv[]){
 	if (not(vm.count("genomeSizeFile"))){
 		std::cout<<"--genomeSizeFile is not specified. Please provide a file holding the total length per chromosome."<<std::endl;;		
 		return 1;
+	}
+
+	if (vm.count("correlationMeasure")){
+		if ((corM != "Pearson") and (corM != "Spearman")){
+			std::cout<<"Please specify a valid correlation measure: Pearson or Spearman"<<std::endl;;		
+			return 1;
+		}
 	}
 
           //Loading genome size file
@@ -151,9 +160,12 @@ int main(int argc, char *argv[]){
 		std::cout<<genomeConv[i].first<<"	"<<genomeConv[i].second<<"	"<<corP[i].first<<"	"<<corP[i].second<<"	"<<corS[i].first<<"	"<<corS[i].second<<std::endl;
 	}
 
-	bs.storeSignificantSignal("Segmentation_"+geneID+".txt",0.05,corP,genomeConv);
 	//Generate a txt file with DNase-seq signal and gene expression across samples for the gene of interest in the significant segments including sample IDs and genomic location
-	std::cout<<bs<<std::endl;
+	if (corM=="Pearson"){
+		bs.storeSignificantSignal("Segmentation_"+geneID+".txt",pvalue,corP,genomeConv);
+	}else{
+		bs.storeSignificantSignal("Segmentation_"+geneID+".txt",pvalue,corS,genomeConv);
+	}
           if (verbose){
 		std::cout<<gtf<<std::endl;
 		std::cout<<gsr<<std::endl;

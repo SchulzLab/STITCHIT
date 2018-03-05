@@ -22,9 +22,12 @@ class CORCOMPTest : public ::testing::Test{
 		v8={};
 		v9={0.01,0.011,0.009,0.012,0.3,0.005};
 		v10={0.012,0.0092,0.00134,0.0118,0.298,0.004};
+		v11={1,500,30,30.001,35,499,501,342,300,0.003,56};
+		v12={10,5,30,30.001,33,300,401,305,280,0.5,600};
+		v13={20,05,300,20.001,330,30,41,5,2,5000,6};
 	}
 	public:
-	std::vector<double> v1,v2,v3,v4,v5,v6,v7,v8,v9,v10;
+	std::vector<double> v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13;
 };
 
 
@@ -99,21 +102,32 @@ TEST_F(CORCOMPTest, PearsonTest5){
 	ASSERT_NEAR(cc.computePearsonCorrelation(),0.99,0.01);
 }
 
+TEST_F(CORCOMPTest, PearsonTest6){
+          CorComp cc(v11,v12);
+          ASSERT_NEAR(cc.computePearsonCorrelation(),0.35758,0.01);
+}
+
+TEST_F(CORCOMPTest, PearsonTest7){
+          CorComp cc(v11,v13);
+          ASSERT_NEAR(cc.computePearsonCorrelation(),-0.347369,0.01);
+}
+
+
 TEST_F(CORCOMPTest, RankTest1){
 	CorComp cc(v1,v2);
 	cc.convertToRanks();
 	std::vector<double> r1 = cc.getRanksV1();
 	std::vector<double> r2 = cc.getRanksV2();
-	ASSERT_DOUBLE_EQ(r1[0],5);
-	ASSERT_DOUBLE_EQ(r1[1],4);
+	ASSERT_DOUBLE_EQ(r1[0],1);
+	ASSERT_DOUBLE_EQ(r1[1],2);
 	ASSERT_DOUBLE_EQ(r1[2],3);
-	ASSERT_DOUBLE_EQ(r1[3],2);
-	ASSERT_DOUBLE_EQ(r1[4],1);
-	ASSERT_DOUBLE_EQ(r2[0],5);
-	ASSERT_DOUBLE_EQ(r2[1],4);
+	ASSERT_DOUBLE_EQ(r1[3],4);
+	ASSERT_DOUBLE_EQ(r1[4],5);
+	ASSERT_DOUBLE_EQ(r2[0],1);
+	ASSERT_DOUBLE_EQ(r2[1],2);
 	ASSERT_DOUBLE_EQ(r2[2],3);
-	ASSERT_DOUBLE_EQ(r2[3],2);
-	ASSERT_DOUBLE_EQ(r2[4],1);
+	ASSERT_DOUBLE_EQ(r2[3],4);
+	ASSERT_DOUBLE_EQ(r2[4],5);
 }
 
 TEST_F(CORCOMPTest, RankTest2){
@@ -127,12 +141,12 @@ TEST_F(CORCOMPTest, RankTest2){
 	ASSERT_DOUBLE_EQ(r1[3],3.5);
 	ASSERT_DOUBLE_EQ(r1[4],3.5);
 	ASSERT_DOUBLE_EQ(r1[5],3.5);
-	ASSERT_DOUBLE_EQ(r2[0],1);
-	ASSERT_DOUBLE_EQ(r2[1],2);
-	ASSERT_DOUBLE_EQ(r2[2],3);
-	ASSERT_DOUBLE_EQ(r2[3],4);
-	ASSERT_DOUBLE_EQ(r2[4],5);
-	ASSERT_DOUBLE_EQ(r2[5],6);
+	ASSERT_DOUBLE_EQ(r2[0],6);
+	ASSERT_DOUBLE_EQ(r2[1],5);
+	ASSERT_DOUBLE_EQ(r2[2],4);
+	ASSERT_DOUBLE_EQ(r2[3],3);
+	ASSERT_DOUBLE_EQ(r2[4],2);
+	ASSERT_DOUBLE_EQ(r2[5],1);
 }
 
 TEST_F(CORCOMPTest, RankTest3){
@@ -140,17 +154,48 @@ TEST_F(CORCOMPTest, RankTest3){
 	cc.convertToRanks();
 	std::vector<double> r1 = cc.getRanksV1();
 	std::vector<double> r2 = cc.getRanksV2();
-	ASSERT_DOUBLE_EQ(r1[0],5);
-	ASSERT_DOUBLE_EQ(r1[1],4);
+	ASSERT_DOUBLE_EQ(r1[0],1);
+	ASSERT_DOUBLE_EQ(r1[1],2);
 	ASSERT_DOUBLE_EQ(r1[2],3);
-	ASSERT_DOUBLE_EQ(r1[3],2);
-	ASSERT_DOUBLE_EQ(r1[4],1);
-	ASSERT_DOUBLE_EQ(r2[0],5);
-	ASSERT_DOUBLE_EQ(r2[1],4);
-	ASSERT_DOUBLE_EQ(r2[2],2);
+	ASSERT_DOUBLE_EQ(r1[3],4);
+	ASSERT_DOUBLE_EQ(r1[4],5);
+	ASSERT_DOUBLE_EQ(r2[0],1);
+	ASSERT_DOUBLE_EQ(r2[1],2);
+	ASSERT_DOUBLE_EQ(r2[2],4);
 	ASSERT_DOUBLE_EQ(r2[3],3);
-	ASSERT_DOUBLE_EQ(r2[4],1);
+	ASSERT_DOUBLE_EQ(r2[4],5);
 }
+
+
+TEST_F(CORCOMPTest, RankTest4){
+	CorComp cc(v11,v13);
+	cc.convertToRanks();
+	std::vector<double> r1 = cc.getRanksV1();
+	std::vector<double> r2 = cc.getRanksV2();
+	ASSERT_DOUBLE_EQ(r1[0],2);
+	ASSERT_DOUBLE_EQ(r1[1],10);
+	ASSERT_DOUBLE_EQ(r1[2],3);
+	ASSERT_DOUBLE_EQ(r1[3],4);
+	ASSERT_DOUBLE_EQ(r1[4],5);
+	ASSERT_DOUBLE_EQ(r1[5],9);
+	ASSERT_DOUBLE_EQ(r1[6],11);
+	ASSERT_DOUBLE_EQ(r1[7],8);
+	ASSERT_DOUBLE_EQ(r1[8],7);
+	ASSERT_DOUBLE_EQ(r1[9],1);
+	ASSERT_DOUBLE_EQ(r1[10],6);
+	ASSERT_DOUBLE_EQ(r2[0],5);
+	ASSERT_DOUBLE_EQ(r2[1],2.5);
+	ASSERT_DOUBLE_EQ(r2[2],9);
+	ASSERT_DOUBLE_EQ(r2[3],6);
+	ASSERT_DOUBLE_EQ(r2[4],10);
+	ASSERT_DOUBLE_EQ(r2[5],7);
+	ASSERT_DOUBLE_EQ(r2[6],8);
+	ASSERT_DOUBLE_EQ(r2[7],2.5);
+	ASSERT_DOUBLE_EQ(r2[8],1.0);
+	ASSERT_DOUBLE_EQ(r2[9],11.0);
+	ASSERT_DOUBLE_EQ(r2[10],4);
+}
+
 
 TEST_F(CORCOMPTest, SpearmanTest1){
 	CorComp cc (v1,v2);
@@ -176,6 +221,17 @@ TEST_F(CORCOMPTest, SpearmanTest5){
 	CorComp cc(v9,v10);
 	ASSERT_NEAR(cc.computeSpearmanCorrelation(),0.7714,0.01);
 }
+
+TEST_F(CORCOMPTest, SpearmanTest6){
+	CorComp cc(v11,v12);
+	ASSERT_NEAR(cc.computeSpearmanCorrelation(),0.5636364,0.01);
+}
+
+TEST_F(CORCOMPTest, SpearmanTest7){
+	CorComp cc(v11,v13);
+	ASSERT_NEAR(cc.computeSpearmanCorrelation(),-0.4282471,0.01);
+}
+
 
 TEST_F(CORCOMPTest, FisherZTest1){
 	CorComp cc(v9,v10);

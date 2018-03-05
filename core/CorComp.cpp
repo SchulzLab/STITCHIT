@@ -89,15 +89,15 @@ void CorComp::convertToRanks(){
 	}
 
 	
-	std::multimap<double,double>::reverse_iterator rit;
+	std::multimap<double,double>::iterator rit;
 	double rankV=1;
-	for (rit=mv1.rbegin(); rit!=mv1.rend(); ++rit){
+	for (rit=mv1.begin(); rit!=mv1.end(); ++rit){
 		rit->second=rankV;
 		rankV=rankV+1;
 	}
 
 	rankV=1;
-	for (rit=mv2.rbegin(); rit!=mv2.rend(); ++rit){
+	for (rit=mv2.begin(); rit!=mv2.end(); ++rit){
 		rit->second=rankV;
 		rankV=rankV+1;
 	}
@@ -112,9 +112,7 @@ void CorComp::convertToRanks(){
 			counter=counter+1;
 			sum=sum+it->second;
 		}
-		for (std::multimap<double,double>::iterator it=ret.first; it!=ret.second; ++it){
-			r1_.push_back(sum/counter);
-		}
+		r1_.push_back(sum/counter);
 	 }
 
 	for(double element :v2_){
@@ -126,9 +124,7 @@ void CorComp::convertToRanks(){
 			counter=counter+1;
 			sum=sum+it->second;
 		}
-		for (std::multimap<double,double>::iterator it=ret.first; it!=ret.second; ++it){
-			r2_.push_back(sum/counter);
-		}
+		r2_.push_back(sum/counter);
 	 }
 }
 
