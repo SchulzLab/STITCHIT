@@ -162,8 +162,8 @@ int main(int argc, char *argv[]){
 
 	//Generate a txt file with DNase-seq signal and gene expression across samples for the gene of interest in the significant segments including sample IDs and genomic location
 	if (corM=="Both"){
-		bs.storeSignificantSignal("Segmentation_"+geneID+"_Pearson.txt", pvalue, corP, genomeConv, genomicCoordinates);
-		bs.storeSignificantSignal("Segmentation_"+geneID+"_Spearman.txt", pvalue, corS, genomeConv, genomicCoordinates);
+		bs.storeSignificantSignal("Segmentation_"+geneID+"_"+std::to_string(stepSize)+"_Pearson.txt", pvalue, corP, genomeConv, genomicCoordinates);
+		bs.storeSignificantSignal("Segmentation_"+geneID+"_"+std::to_string(stepSize)+"_Spearman.txt", pvalue, corS, genomeConv, genomicCoordinates);
 	}else{
 		if (corM=="Spearman"){
 			bs.storeSignificantSignal("Segmentation_"+geneID+"_"+corM+"_"+std::to_string(stepSize)+".txt", pvalue, corS, genomeConv, genomicCoordinates);

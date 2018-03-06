@@ -141,7 +141,7 @@ void BinSelection::storeSignificantSignal(const std::string& filename, float thr
 		}
 	}
 
-	if (validIndex.size()>0){
+	if (not(validIndex.empty())){
 		std::ofstream outfile;
 		outfile.open(filename);	
 		outfile<<"\t";
