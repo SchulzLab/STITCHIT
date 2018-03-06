@@ -114,7 +114,7 @@ int main(int argc, char *argv[]){
 	gtf.findGenomicLocation(geneID);
 	std::tuple<std::string, unsigned int, unsigned int,std::string> genomicCoordinates;
 	genomicCoordinates = gtf.getGenomicLocation();
-	std::cout<<"Coordinates found: "<<std::get<0>(genomicCoordinates)<<" "<<std::get<1>(genomicCoordinates)+window<<" "<<std::get<2>(genomicCoordinates)-window<<", gene length: "<<std::get<2>(genomicCoordinates)-std::get<1>(genomicCoordinates)<<std::endl;
+	std::cout<<"Coordinates found: "<<std::get<0>(genomicCoordinates)<<" "<<std::get<1>(genomicCoordinates)+window<<" "<<std::get<2>(genomicCoordinates)-window<<", window length: "<<std::get<2>(genomicCoordinates)-std::get<1>(genomicCoordinates)<<std::endl;
 	
           //Generating expression map
 	std::cout<<"Extracting discretised gene expression information for "<<geneID<<std::endl;
@@ -166,9 +166,9 @@ int main(int argc, char *argv[]){
 		bs.storeSignificantSignal("Segmentation_"+geneID+"_Spearman.txt", pvalue, corS, genomeConv, genomicCoordinates);
 	}else{
 		if (corM=="Spearman"){
-			bs.storeSignificantSignal("Segmentation_"+geneID+"_"+corM+".txt", pvalue, corS, genomeConv, genomicCoordinates);
+			bs.storeSignificantSignal("Segmentation_"+geneID+"_"+corM+"_"+std::to_string(stepSize)+".txt", pvalue, corS, genomeConv, genomicCoordinates);
 		}else{
-			bs.storeSignificantSignal("Segmentation_"+geneID+"_"+corM+".txt", pvalue, corP, genomeConv, genomicCoordinates);
+			bs.storeSignificantSignal("Segmentation_"+geneID+"_"+corM+"_"+std::to_string(stepSize)+".txt", pvalue, corP, genomeConv, genomicCoordinates);
 		}
 	}
           if (verbose){

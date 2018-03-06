@@ -134,26 +134,29 @@ void BinSelection::storeSignificantSignal(const std::string& filename, float thr
 	for (auto& sample : sampleNames_){
 		expVecTemp.push_back(expressionMap_[sample]);
 	}
-	std::ofstream outfile;
-	outfile.open(filename);	
 	std::vector<unsigned int> validIndex;
 	for (unsigned int index = 0; index< correlation.size(); index++){
 		if (correlation[index].second <= threshold){
 			validIndex.push_back(index);
 		}
 	}
-	outfile<<"\t";
-	for (auto& item : validIndex){
-		outfile <<std::get<0>(genomePos)<<":"<<intervalPosition[item].first << "-" <<intervalPosition[item].second<<"\t";
-	}
-	outfile<<"Expression\n";
-	for (unsigned int sam = 0; sam < numSam; sam++){
-		outfile << sampleNames_[sam];
+
+	if (validIndex.size()>0){
+		std::ofstream outfile;
+		outfile.open(filename);	
+		outfile<<"\t";
 		for (auto& item : validIndex){
-			outfile << "\t" <<  meanSignal_[sam][item];
-		}	
-	outfile <<"\t"<< expVecTemp[sam]<< '\n';
+			outfile <<std::get<0>(genomePos)<<":"<<intervalPosition[item].first << "-" <<intervalPosition[item].second<<"\t";
+		}
+		outfile<<"Expression\n";
+		for (unsigned int sam = 0; sam < numSam; sam++){
+			outfile << sampleNames_[sam];
+			for (auto& item : validIndex){
+				outfile << "\t" <<  meanSignal_[sam][item];
+			}	
+		outfile <<"\t"<< expVecTemp[sam]<< '\n';
+		}
+		outfile.close();
 	}
-	outfile.close();
 }
 	
