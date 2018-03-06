@@ -66,6 +66,26 @@ void ExpressionReader::loadExpressionData(const std::string& targetGeneID,bool l
 	}
 }
 
+void ExpressionReader::checkDiversity(){
+	std::map<int,unsigned int> occurences;
+	for (const auto& element : expressionMap_){
+		if (occurences.find(element.second)==occurences.end())
+			occurences[element.second]=1;
+		else
+			occurences[element.second]+=1;
+	}
+	unsigned int mapSize=occurences.size();
+	if (mapSize==1)
+		throw std::runtime_error("Expression file "+expFileName_+" contains only one value for the specified gene");
+	else{
+		double minSize=expressionMap_.size()*0.03;
+		for (const auto& element : occurences){
+			if (element.second < minSize)
+				throw std::runtime_error("At least three percent of the data should have the discrete expression value of "+std::to_string(element.first));
+		}
+	}
+}
+
 std::map<std::string, double>& ExpressionReader::getExpressionMap(){
 	return expressionMap_;
 }

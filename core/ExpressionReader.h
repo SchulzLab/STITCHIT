@@ -14,7 +14,7 @@ class ExpressionReader{
 	void loadExpressionData(const std::string& targetGeneID,bool log2Transform);
 	std::map<std::string, double>& getExpressionMap();
 	const std::string& getFilename();
-
+	void checkDiversity();
           friend std::ostream& operator<<(std::ostream& os,const ExpressionReader& r);
 
 

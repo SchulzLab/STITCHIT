@@ -28,6 +28,7 @@ int main(int argc, char *argv[]){
           std::string expressionOriginal;
 	std::string genomeSizeFile;
 	std::string corM;
+	std::string outputPrefix;
 	unsigned int window;
 	unsigned int stepSize;
 	unsigned int maxCores;
@@ -48,6 +49,7 @@ int main(int argc, char *argv[]){
 		("cores,c", boost::program_options::value<unsigned int>(&maxCores)->default_value(2), "Number of cores to be used for the computation")
 		("pvalue,p",boost::program_options::value<float>(&pvalue)->default_value(0.05),"Signifcance level for the correlation of a segment to be considered in the output")
 		("correlationMeasure,m",boost::program_options::value<std::string>(&corM)->default_value("Both"),"Method used to compute correlation between expression and epigenetic signal. Can be Both (default), Pearson, or Spearman")
+		("prefix,f",boost::program_options::value<std::string>(&outputPrefix)->default_value(""),"Path were resulting files should be stored, defaults to STITCH source directory")
 		("verbose,v", boost::program_options::value<bool>(&verbose)->default_value(false), "True if additional status reports should be generated, false otherwise")
 	;
 	
@@ -102,6 +104,13 @@ int main(int argc, char *argv[]){
 		}
 	}
 
+	if (vm.count("prefix")){
+		if (outputPrefix[outputPrefix.size()]!='/'){
+			outputPrefix+="/";
+		}
+		std::cout<<"Results will be stored in "<<outputPrefix<<std::endl;
+	}
+
           //Loading genome size file
 	GenomeSizeReader gsr(genomeSizeFile);
 	gsr.loadGenomeSizeFile();
@@ -120,6 +129,7 @@ int main(int argc, char *argv[]){
 	std::cout<<"Extracting discretised gene expression information for "<<geneID<<std::endl;
 	ExpressionReader expR(expressionDiscretised);
 	expR.loadExpressionData(geneID,false);
+	expR.checkDiversity();
 	std::map<std::string, double> expressionMap;
 	expressionMap = expR.getExpressionMap();
 
@@ -162,13 +172,13 @@ int main(int argc, char *argv[]){
 
 	//Generate a txt file with DNase-seq signal and gene expression across samples for the gene of interest in the significant segments including sample IDs and genomic location
 	if (corM=="Both"){
-		bs.storeSignificantSignal("Segmentation_"+geneID+"_"+std::to_string(stepSize)+"_Pearson.txt", pvalue, corP, genomeConv, genomicCoordinates);
-		bs.storeSignificantSignal("Segmentation_"+geneID+"_"+std::to_string(stepSize)+"_Spearman.txt", pvalue, corS, genomeConv, genomicCoordinates);
+		bs.storeSignificantSignal(outputPrefix+"Segmentation_"+geneID+"_"+std::to_string(stepSize)+"_Pearson.txt", pvalue, corP, genomeConv, genomicCoordinates);
+		bs.storeSignificantSignal(outputPrefix+"Segmentation_"+geneID+"_"+std::to_string(stepSize)+"_Spearman.txt", pvalue, corS, genomeConv, genomicCoordinates);
 	}else{
 		if (corM=="Spearman"){
-			bs.storeSignificantSignal("Segmentation_"+geneID+"_"+corM+"_"+std::to_string(stepSize)+".txt", pvalue, corS, genomeConv, genomicCoordinates);
+			bs.storeSignificantSignal(outputPrefix+"Segmentation_"+geneID+"_"+corM+"_"+std::to_string(stepSize)+".txt", pvalue, corS, genomeConv, genomicCoordinates);
 		}else{
-			bs.storeSignificantSignal("Segmentation_"+geneID+"_"+corM+"_"+std::to_string(stepSize)+".txt", pvalue, corP, genomeConv, genomicCoordinates);
+			bs.storeSignificantSignal(outputPrefix+"Segmentation_"+geneID+"_"+corM+"_"+std::to_string(stepSize)+".txt", pvalue, corP, genomeConv, genomicCoordinates);
 		}
 	}
           if (verbose){
