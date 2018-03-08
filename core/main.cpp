@@ -105,10 +105,10 @@ int main(int argc, char *argv[]){
 	}
 
 	if (vm.count("prefix")){
-		if (outputPrefix[outputPrefix.size()]!='/'){
+		if ((outputPrefix[outputPrefix.size()]!='/') and (outputPrefix.size()>1)){
+			std::cout<<"Results will be stored in "<<outputPrefix<<std::endl;
 			outputPrefix+="/";
 		}
-		std::cout<<"Results will be stored in "<<outputPrefix<<std::endl;
 	}
 
           //Loading genome size file
@@ -165,11 +165,6 @@ int main(int argc, char *argv[]){
 	//Assess correlation of signal in bins to gene expression
 	std::vector<std::pair<double,double> > corP = bs.computePearsonCorrelation();
 	std::vector<std::pair<double,double> > corS = bs.computeSpearmanCorrelation();
-	std::cout<<"Start	End	Pearson	pValue	Spearman	pValue"<<std::endl;
-	for (unsigned int i=0; i<genomeConv.size();i++){
-		std::cout<<genomeConv[i].first<<"	"<<genomeConv[i].second<<"	"<<corP[i].first<<"	"<<corP[i].second<<"	"<<corS[i].first<<"	"<<corS[i].second<<std::endl;
-	}
-
 	//Generate a txt file with DNase-seq signal and gene expression across samples for the gene of interest in the significant segments including sample IDs and genomic location
 	if (corM=="Both"){
 		bs.storeSignificantSignal(outputPrefix+"Segmentation_"+geneID+"_"+std::to_string(stepSize)+"_Pearson.txt", pvalue, corP, genomeConv, genomicCoordinates);
@@ -188,6 +183,11 @@ int main(int argc, char *argv[]){
 		std::cout<<expO<<std::endl;
 		std::cout<<SPIG<<std::endl;	
 		std::cout<<bs<<std::endl;	
+		std::cout<<"Start	End	Pearson	pValue	Spearman	pValue"<<std::endl;
+		for (unsigned int i=0; i<genomeConv.size();i++){
+			std::cout<<genomeConv[i].first<<"	"<<genomeConv[i].second<<"	"<<corP[i].first<<"	"<<corP[i].second<<"	"<<corS[i].first<<"	"<<corS[i].second<<std::endl;
+		}
+
 	}
 	
 	return 0;

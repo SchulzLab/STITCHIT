@@ -12,39 +12,28 @@ Fraction::Fraction(int s, int e, int sS, std::set<int> cat){
     std::set<int>::iterator it;
     for(it = categories.begin(); it != categories.end(); ++it){
         int label = *it;
-        sse[label]  = new std::vector<double>();
-        se[label]   = new std::vector<double>();
+        sse[label];
+        se[label];
     }
-    seg = new S::segmentation();
     // true after first iteration -- don't calculate costs or initial costs again
     weightsSet = false;
     merged = false;
 }
 
-Fraction::~Fraction(){
-    std::set<int>::iterator it;
-    for(it = categories.begin(); it != categories.end(); ++it){
-        int label = *it;
-        delete sse[label];
-        delete se[label];
-    }
-    delete seg;
-}
-
-void Fraction::mergeIn(Fraction* f){
+void Fraction::mergeIn(Fraction& f){
     merged = true;
-    if(f->start < start){
-        assert(f->end == start);
-        start = f->start;
+    if(f.start < start){
+        assert(f.end == start);
+        start = f.start;
         // push front
-        for(unsigned int i = 0; i < f->seg->size(); i++){
-            seg->insert(seg->begin(), (*f->seg)[i]);
+        for(unsigned int i = 0; i < f.seg.size(); i++){
+            seg.insert(seg.begin(), (f.seg)[i]);
             // shift because of zero in beginning
             std::set<int>::iterator it;
             for (it = categories.begin(); it != categories.end(); ++it){
                 int label = *it;
-                sse[label]->insert(sse[label]->begin() + 1, (*(f->sse[label]))[(i+1)]);
-                se[label]->insert(se[label]->begin() + 1, (*(f->se[label]))[(i+1)]);
+                sse[label].insert(sse[label].begin() + 1, (f.sse[label])[(i+1)]);
+                se[label].insert(se[label].begin() + 1, (f.se[label])[(i+1)]);
             }
         }
         // add increased sum to old ones
@@ -53,44 +42,44 @@ void Fraction::mergeIn(Fraction* f){
         std::set<int>::iterator it;
         for(it = categories.begin(); it != categories.end(); ++it){
             int label = *it;
-            maxsse[label] = (*(f->sse[label]))[f->sse[label]->size() - 1];
-            maxse[label] = (*(f->se[label]))[f->se[label]->size() - 1];
+            maxsse[label] = (f.sse[label])[f.sse[label].size() - 1];
+            maxse[label] = (f.se[label])[f.se[label].size() - 1];
         }
-        for(unsigned int i = f->sse[1]->size(); i < sse[1]->size(); i++){
+        for(unsigned int i = f.sse[1].size(); i < sse[1].size(); i++){
             std::set<int>::iterator it;
             for(it = categories.begin(); it != categories.end(); ++it){
                 int label = *it;
-                (*(sse[label]))[i] += maxsse[label];
-                (*(se[label]))[i] += maxse[label];
+                (sse[label])[i] += maxsse[label];
+                (se[label])[i] += maxse[label];
             }
         }
     }else{
-        assert(end == f->start);
-        end = f->end;
+        assert(end == f.start);
+        end = f.end;
         simplemap maxsse;
         simplemap maxse;
         std::set<int>::iterator it;
         for(it = categories.begin(); it != categories.end(); ++it){
             int label = *it;
-            maxsse[label] = (*(sse[label]))[sse[label]->size() - 1];
-            maxse[label] = (*(se[label]))[se[label]->size() - 1];
+            maxsse[label] = (sse[label])[sse[label].size() - 1];
+            maxse[label] = (se[label])[se[label].size() - 1];
         }
-        for(unsigned int i = 0; i < f->seg->size(); i++){
-            seg->push_back((*(f->seg))[i]);
+        for(unsigned int i = 0; i < f.seg.size(); i++){
+            seg.push_back((f.seg)[i]);
             std::set<int>::iterator it;
             for(it = categories.begin(); it != categories.end(); ++it){
                 int label = *it;
-                sse[label]->push_back((*(f->sse[label]))[i+1] + maxsse[label]);
-                se[label]->push_back((*(f->se[label]))[i+1] + maxse[label]);
+                sse[label].push_back((f.sse[label])[i+1] + maxsse[label]);
+                se[label].push_back((f.se[label])[i+1] + maxse[label]);
             }
         }
     }
 }
 
-void Fraction::updateSegmentation(S::segmentation s){
-    S::segmentation old = *seg;
-    while(seg->size() > 0){
-        seg->pop_back();
+void Fraction::updateSegmentation(S::segmentation& s){
+    S::segmentation old = seg;
+    while(seg.size() > 0){
+        seg.pop_back();
     }
     int old_index = 0;
     std::vector<int> toDelete;
@@ -100,13 +89,13 @@ void Fraction::updateSegmentation(S::segmentation s){
             old_index++;
         }
         old_index++;
-        seg->push_back(s[i]);
+        seg.push_back(s[i]);
     }
     adjustErrors(toDelete);
 }
 
-void Fraction::adjustErrors(std::vector<int> toDelete){
-    if((sse[1]->size() - 1) != seg->size()){
+void Fraction::adjustErrors(std::vector<int>& toDelete){
+    if((sse[1].size() - 1) != seg.size()){
         std::set<int>::iterator it;
         for(it = categories.begin(); it != categories.end(); ++it){
             int label = *it;
@@ -116,21 +105,21 @@ void Fraction::adjustErrors(std::vector<int> toDelete){
     }
 }
 
-void Fraction::cutItOff(std::vector<double>* dum, std::vector<int> toDelete){
+void Fraction::cutItOff(std::vector<double>& dum, std::vector<int>& toDelete){
     int i = 0;
     unsigned int del_i = 0;
-    for(std::vector<double>::iterator it = dum->begin() + 1; it != dum->end() - 1;){
+    for(std::vector<double>::iterator it = dum.begin() + 1; it != dum.end() - 1;){
         if(del_i >= toDelete.size())
             break;
         if(i == toDelete[del_i]){
-            it = dum->erase(it);
+            it = dum.erase(it);
             del_i++;
         }else{
             ++it;
         }
         i++;
     }
-    assert((dum->size() - 1) == seg->size());
+    assert((dum.size() - 1) == seg.size());
 }
 
 int Fraction::size(){

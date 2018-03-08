@@ -24,16 +24,16 @@ protected:
     Data data;
     bool verbose;
     
-    void applyDPFlexi(int, Fraction*);
+    void applyDPFlexi(int, Fraction&, bool) const;
     
-    std::vector<int> Merge(std::vector<int>,std::vector<int>);
-    double modelCost(int,int);
+    std::vector<int> Merge(std::vector<int>&,std::vector<int>&) const;
+    double modelCost(int,int) const;
     
 public:
     // constructors
     Binning(Data&,bool);
-    void runSPAN(int, Fraction*);
-    void printSegmentation(S::segmentation);
+    void runSPAN(int, Fraction&, bool) const;
+    void printSegmentation(S::segmentation) const;
 };
 
 #endif

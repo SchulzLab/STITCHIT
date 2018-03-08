@@ -16,7 +16,7 @@ Binning::Binning(Data& d, bool v){
 	length = d.n;
 }
 
-double Binning::modelCost(int bins, int total){
+double Binning::modelCost(int bins, int total) const{
 	assert(bins > 0);
 	double weightCutpoints = 0.0;
 	if(total == length)
@@ -29,7 +29,7 @@ double Binning::modelCost(int bins, int total){
 }
 
 
-void Binning::printSegmentation(S::segmentation seg) {
+void Binning::printSegmentation(S::segmentation seg) const {
     std::cout << "Number of bins: " << seg.size() << " --> ";
     for (unsigned long i = 0; i < seg.size(); i++) {
         std::cout << "[" << seg[i].start << ", " << seg[i].end << ") ";
@@ -37,7 +37,7 @@ void Binning::printSegmentation(S::segmentation seg) {
     std::cout << std::endl;
 }
 
-std::vector<int> Binning::Merge(std::vector<int> a, std::vector<int> b){
+std::vector<int> Binning::Merge(std::vector<int>& a, std::vector<int>& b) const {
     std::vector<int> newone;
     unsigned long n = 0;
     unsigned long r = 0;
@@ -63,12 +63,13 @@ std::vector<int> Binning::Merge(std::vector<int> a, std::vector<int> b){
     return newone;
 }
 
-void Binning::applyDPFlexi(int kbins, Fraction* f){
-    int beta = (int) f->seg->size();
-    int fSize = f->size();
+void Binning::applyDPFlexi(int kbins, Fraction& f,bool exactK) const{
+    int beta = (int) f.seg.size();
+    int fSize = f.size();
     // precompute weights
     S::weights w = data.precomputeWeightsGaussFast(f);
     
+
     int depth = kbins <= 1 ? beta : std::min(kbins, beta);
     
     // init result vector
@@ -80,10 +81,10 @@ void Binning::applyDPFlexi(int kbins, Fraction* f){
     for(int i = 0; i < beta; i++){
         S::interval v;
         if(i == 0){
-            v = (*(f->seg))[i];
+            v = (f.seg)[i];
         }else{
             v = results[i-1].bins[0];
-            v.joinWith((*(f->seg))[i]);
+            v.joinWith((f.seg)[i]);
         }
         results[i].bins.push_back(v);
         results[i].totalCosts = w[i][0];
@@ -92,7 +93,7 @@ void Binning::applyDPFlexi(int kbins, Fraction* f){
     bestBinning = results[beta-1];
     double mc1 = modelCost(1, fSize);
     bestBinning.totalCosts += mc1;
-    f->initial = bestBinning.totalCosts;
+    f.initial = bestBinning.totalCosts;
     if(verbose)
         std::cout << "Size: " << (1) << " L(D|M): " << results[beta-1].totalCosts << " L(M): " << mc1 << std::endl;
     // fill rest
@@ -105,8 +106,8 @@ void Binning::applyDPFlexi(int kbins, Fraction* f){
             S::interval best_iv;
             for(int j = l-1; j < i; j++){
                 S::interval rest_iv;
-                rest_iv.start = (*(f->seg))[j+1].start;
-                rest_iv.end = (*(f->seg))[i].end;
+                rest_iv.start = (f.seg)[j+1].start;
+                rest_iv.end = (f.seg)[i].end;
                 double score = results[j].totalCosts + w[i][j+1];
                 if(score < best){
                     pos = j;
@@ -133,23 +134,23 @@ void Binning::applyDPFlexi(int kbins, Fraction* f){
         }
     }
     // find best
-    if(kbins > 0){
+    if(kbins > 0 && exactK){
         bestBinning = results[beta-1];
     }
-    f->compressed = bestBinning.totalCosts;
-    double compression = f->compressed / f->initial * 100;
+    f.compressed = bestBinning.totalCosts;
+    double compression = f.compressed / f.initial * 100;
     if (verbose){
     std::cout << "----------------RESULTS----------------\n";
     printf("The relative compression is %.4f%%.\n", compression);
 }
-    f->updateSegmentation(bestBinning.bins);
+    f.updateSegmentation(bestBinning.bins);
 }
 
-void Binning::runSPAN(int k, Fraction* fraction){
-	if(!fraction->merged){
+void Binning::runSPAN(int k, Fraction& fraction, bool exactK) const{
+	if(!fraction.merged){
         // apply initial equal width binning if stepSize > 1; otw. every feature is in its own bin
 		std::vector<int> merge;
-		for(int i = fraction->start; i < fraction->end; i += fraction->stepSize){
+		for(int i = fraction.start; i < fraction.end; i += fraction.stepSize){
 			merge.push_back(i);
 		}
 		int pos = 0;
@@ -163,25 +164,25 @@ void Binning::runSPAN(int k, Fraction* fraction){
 			pos++;
 			if (pos == 2) {
 				pos = 1;
-				fraction->seg->push_back(actual);
+				fraction.seg.push_back(actual);
 				actual.start = actual.end;
 			}
 		}
-		if((*(fraction->seg))[fraction->seg->size()-1].end != fraction->end){
+		if((fraction.seg)[fraction.seg.size()-1].end != fraction.end){
 			actual.start = actual.end;
-			actual.end = fraction->end;
-			fraction->seg->push_back(actual);
+			actual.end = fraction.end;
+			fraction.seg.push_back(actual);
 		}
 	} // if merged segments already exist
     
 	bool autorun = k <= 1;
 	if (verbose){
-		std::cout << "Segment-count before execution: " << fraction->seg->size() << " (initial step size=" << fraction->stepSize << ") \n";
+		std::cout << "Segment-count before execution: " << fraction.seg.size() << " (initial step size=" << fraction.stepSize << ") \n";
 		if (autorun) {
 			std::cout << "--> Use MDL to select number of segments. \n";
 		} else {
 		std::cout << "--> Don't trust MDL and find k=" << k << " segments. \n";
 		}
 	}
-	applyDPFlexi(k,fraction);
+	applyDPFlexi(k,fraction,exactK);
 }

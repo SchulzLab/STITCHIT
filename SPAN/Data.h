@@ -29,7 +29,6 @@ public:
     double logbase;
     int resolution;
     char method;
-    S::costfunptr eval;
     S::matrix data;
     Data() : n(0), m(0) {
         S::matrix dummy(0, std::vector<double>(0));
@@ -37,21 +36,21 @@ public:
     }
     Data(const char*, bool, char, int, bool);
     void read_file(const char* filename, bool, char, int, bool);
-    S::weights precomputeWeightsGaussFast(Fraction*);
+    S::weights precomputeWeightsGaussFast(Fraction&) const;
     unsigned int getRowCount();
     unsigned int getColCount();
     void setData(std::vector<std::vector<double> > input, bool, char, int,  bool);
     double& getElement(unsigned int row,unsigned int col);
     std::vector<double>& getRow(unsigned int row);
-    int categoryCount(); 
+    int categoryCount() const; 
     std::set<int> getCategories(); 
 
 protected:
     int stepSize;
-    double GaussApprox(int,int,Fraction*);
-    double GaussApprox(int,int,int, Fraction*);
-    omega* extractDataMap(S::interval, int);
-    void precalculateCSSandCS(Fraction*);
+    double GaussApprox(int,int,Fraction&) const;
+    double GaussApprox(int,int,int, Fraction&) const;
+    omega extractDataMap(S::interval, int) const;
+    void precalculateCSSandCS(Fraction&) const;
 };
 
 #endif
