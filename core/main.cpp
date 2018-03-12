@@ -18,20 +18,20 @@ argv5 genome size file
 */
 
 int main(int argc, char *argv[]){
-          //Check the provided arguments
-	
-          //storing command args in self explanatory variables for better readability
-          std::string bigWigPath;
-          std::string annotationFile;
-          std::string geneID;
-          std::string expressionDiscretised;
-          std::string expressionOriginal;
+	//Check the provided arguments
+	//storing command args in self explanatory variables for better readability
+	std::string bigWigPath;
+	std::string annotationFile;
+	std::string geneID;
+	std::string expressionDiscretised;
+	std::string expressionOriginal;
 	std::string genomeSizeFile;
 	std::string corM;
 	std::string outputPrefix;
 	unsigned int window;
 	unsigned int stepSize;
 	unsigned int maxCores;
+	unsigned int sizeRestriction;
 	float pvalue;
 	bool verbose;
 	
@@ -51,6 +51,7 @@ int main(int argc, char *argv[]){
 		("correlationMeasure,m",boost::program_options::value<std::string>(&corM)->default_value("Both"),"Method used to compute correlation between expression and epigenetic signal. Can be Both (default), Pearson, or Spearman")
 		("prefix,f",boost::program_options::value<std::string>(&outputPrefix)->default_value(""),"Path were resulting files should be stored, defaults to STITCH source directory")
 		("verbose,v", boost::program_options::value<bool>(&verbose)->default_value(false), "True if additional status reports should be generated, false otherwise")
+		("restriction,r",boost::program_options::value<unsigned int>(&sizeRestriction)->default_value(100000),"Maximum size of extension and gene length allowed, default is 100kb")
 	;
 	
 	boost::program_options::variables_map vm;
@@ -111,21 +112,25 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-          //Loading genome size file
+	//Loading genome size file
 	GenomeSizeReader gsr(genomeSizeFile);
 	gsr.loadGenomeSizeFile();
 	std::map<std::string,int> genomeSize;
 	genomeSize = gsr.getGenomeSize();
 
-          //Reading the annotation file to retrieve gene coordinates
+	//Reading the annotation file to retrieve gene coordinates
 	std::cout<<"Looking up genomic coordinates for "<<geneID<<std::endl;
 	GTFReader gtf(annotationFile,genomeSize,window);
 	gtf.findGenomicLocation(geneID);
 	std::tuple<std::string, unsigned int, unsigned int,std::string> genomicCoordinates;
 	genomicCoordinates = gtf.getGenomicLocation();
 	std::cout<<"Coordinates found: "<<std::get<0>(genomicCoordinates)<<" "<<std::get<1>(genomicCoordinates)+window<<" "<<std::get<2>(genomicCoordinates)-window<<", window length: "<<std::get<2>(genomicCoordinates)-std::get<1>(genomicCoordinates)<<std::endl;
-	
-          //Generating expression map
+	if(std::get<2>(genomicCoordinates)-std::get<1>(genomicCoordinates)>sizeRestriction){
+		std::cout<<"Window is exceeding size limit of "<<sizeRestriction<<". Aborting."<<std::endl;
+		return 1;
+	}	
+
+	//Generating expression map
 	std::cout<<"Extracting discretised gene expression information for "<<geneID<<std::endl;
 	ExpressionReader expR(expressionDiscretised);
 	expR.loadExpressionData(geneID,false);
