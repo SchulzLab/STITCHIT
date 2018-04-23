@@ -19,3 +19,5 @@ add_test_case(runSPANTests spanTest.cpp)
 add_test_case(runBinSelectionTests binSelectionTest.cpp)
 
 add_test_case(runCorCompTest corCompTest.cpp)
+
+add_test_case(runPeakReaderTest peakReaderTest.cpp)
