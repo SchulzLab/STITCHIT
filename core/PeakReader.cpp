@@ -16,6 +16,7 @@ PeakReader::PeakReader(const std::string& filename)
  */
 void PeakReader::findOverlappingPeaks(std::tuple<std::string, unsigned int, unsigned int> genomicCoordinates){
           std::ifstream peakFile;
+	unsigned int prevStart = 0;
           unsigned int start;
 	unsigned int end;
           std::string temp;
@@ -27,23 +28,30 @@ void PeakReader::findOverlappingPeaks(std::tuple<std::string, unsigned int, unsi
 	std::string queryChromosome=std::get<0>(genomicCoordinates);
 	unsigned int queryStart=std::get<1>(genomicCoordinates);
 	unsigned int queryEnd=std::get<2>(genomicCoordinates);
-
+	if (queryStart >= queryEnd) throw std::invalid_argument("Invalid genomic coordinates! Start coordinate must be smaller than end coordinate."); 
           while (!peakFile.eof()){
                     std::getline(peakFile,temp);
                     std::stringstream cs(temp);
                     if (temp != ""){
                               if (cs >> chromosome >> start >> end){
 				if (chromosome==queryChromosome){
-					if ((start < queryStart) and (end > queryStart)){
-						overlappingPeaks_.push_back(std::make_pair (start,end));
+					if (start > prevStart){
+						if (start > end) throw std::invalid_argument("Start position can not be numerically larger than end position of a peak");
+						if ((start < queryStart) and (end > queryStart)){
+							overlappingPeaks_.push_back(std::make_pair (start,end));
+							}
+						else if((start > queryStart) and (start < queryEnd)){
+							overlappingPeaks_.push_back(std::make_pair (start,end));
+							}
+						else if (start > queryEnd){
+							break;
+							}		
+						}
+					else {
+				   throw std::invalid_argument("Peak file "+filename_+" is not sorted.");
 					}
-					else if((start > queryStart) and (start < queryEnd)){
-						overlappingPeaks_.push_back(std::make_pair (start,end));
-					}
-					if (start > queryEnd){
-						break;
-					}		
-				}	
+				prevStart=start;	
+				}
                               }else{
                                         throw std::invalid_argument("Peak file "+filename_+" is not properly formatted.");
                               }
