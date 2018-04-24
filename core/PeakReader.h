@@ -1,11 +1,12 @@
-#ifndef PEAKREADER_h
-#define PEAKREADER_h
+#ifndef PEAKREADER_H
+#define PEAKREADER_H
 
 #include <map>
 #include <string>
 #include <sstream>
 #include <fstream>
 #include <tuple>
+#include <vector>
 
 class PeakReader{
 	public:

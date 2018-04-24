@@ -3,7 +3,7 @@
 #include "GTFReader.h"
 #include "ExpressionReader.h"
 #include "BinSelection.h"
-#include "../SPAN/Span.h"
+#include "PeakReader.h"
 #include "boost/program_options/options_description.hpp"
 #include "boost/program_options/variables_map.hpp"
 #include "boost/program_options/parsers.hpp"
@@ -29,8 +29,6 @@ int main(int argc, char *argv[]){
 	std::string outputPrefix;
 	std::string peakFile;
 	unsigned int window;
-	unsigned int stepSize;
-	unsigned int maxCores;
 	unsigned int sizeRestriction;
 	float pvalue;
 	bool verbose;
@@ -38,28 +36,26 @@ int main(int argc, char *argv[]){
 	boost::program_options::options_description desc("STITCH options");
 	desc.add_options()
 		("help","Show help message")
+		("peakFile,k",boost::program_options::value<std::string>(&peakFile),"File containing the peak calls that should be used for annotation. The file must be sorted.")
 		("bigWigPath,b", boost::program_options::value<std::string>(&bigWigPath), "Path to big wig files")
 		("annotationFile,a",boost::program_options::value<std::string>(&annotationFile), "Path to the annotation file that should be used")
 		("geneID,g",boost::program_options::value<std::string>(&geneID), "ID of the gene that should be segmented")
 		("expressionDiscretised,d",boost::program_options::value<std::string>(&expressionDiscretised), "File containing the discretised expression information")
 		("expressionOriginal,o",boost::program_options::value<std::string>(&expressionOriginal), "File containng the original expression information")
 		("genomeSizeFile,s",boost::program_options::value<std::string>(&genomeSizeFile), "File containig the size of the chromosomes of the reference genome")
-		("window,w",boost::program_options::value<unsigned int>(&window)->default_value(5000), "Size of the window considered upstream and downstream of the gene body")
-		("stepSize,z",boost::program_options::value<unsigned int>(&stepSize)->default_value(1), "Resolution parameter used by SPAN to merge the initial binning")
-		("cores,c", boost::program_options::value<unsigned int>(&maxCores)->default_value(2), "Number of cores to be used for the computation")
-		("pvalue,p",boost::program_options::value<float>(&pvalue)->default_value(0.05),"Signifcance level for the correlation of a segment to be considered in the output")
+		("window,w",boost::program_options::value<unsigned int>(&window)->default_value(5000), "Size of the window considered upstream and downstream of the gene body, default is 5bk")
+		("pvalue,p",boost::program_options::value<float>(&pvalue)->default_value(0.05),"Signifcance level for the correlation of a Peak to be considered in the output, default is 0.05")
 		("correlationMeasure,m",boost::program_options::value<std::string>(&corM)->default_value("Both"),"Method used to compute correlation between expression and epigenetic signal. Can be Both (default), Pearson, or Spearman")
 		("prefix,f",boost::program_options::value<std::string>(&outputPrefix)->default_value(""),"Path were resulting files should be stored, defaults to STITCH source directory")
-		("verbose,v", boost::program_options::value<bool>(&verbose)->default_value(false), "True if additional status reports should be generated, false otherwise")
+		("verbose,v", boost::program_options::value<bool>(&verbose)->default_value(false), "True if additional status reports should be generated, false otherwise (default)")
 		("restriction,r",boost::program_options::value<unsigned int>(&sizeRestriction)->default_value(100000),"Maximum size of extension and gene length allowed, default is 100kb")
-		("peakFile,k",boost::program_options::value<std::string>(&peak)->default_value(NULL),"File containing the peak calls that should be used for annotation. The file must be sorted.")
 	;
 	
 	boost::program_options::variables_map vm;
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
 	boost::program_options::notify(vm);
 
-	if (argc == 1){
+	if (argc <= 8){
 		std::cout<<desc<<std::endl;
 		return 1;
 	}
@@ -146,11 +142,10 @@ int main(int argc, char *argv[]){
 
           //Generate window of overlapping bins
 	std::cout<<"Searching for peaks using a search window extended by "<<window<<"bp up- and downstream of the gene"<<std::endl;
-	
-	std::vector<std::pair<unsigned int, unsigned int> > genomeConv= //Read the merged peak file here
-	
+	PeakReader pr(peakFile);
+	pr.findOverlappingPeaks(std::make_tuple(std::get<0>(genomicCoordinates),std::get<1>(genomicCoordinates),std::get<2>(genomicCoordinates)));
+	std::vector<std::pair<unsigned int, unsigned int> > genomeConv= pr.getOverlappingPeaks();
 	std::cout<<"Identified "<<genomeConv.size()<<" peaks within designated window."<<std::endl;
-
 
 	//Loading original gene expression data
 	std::cout<<"Extracting original gene expression information for "<<geneID<<std::endl;
@@ -169,13 +164,13 @@ int main(int argc, char *argv[]){
 	std::vector<std::pair<double,double> > corS = bs.computeSpearmanCorrelation();
 	//Generate a txt file with DNase-seq signal and gene expression across samples for the gene of interest in the significant segments including sample IDs and genomic location
 	if (corM=="Both"){
-		bs.storeSignificantSignal(outputPrefix+"Segmentation_"+geneID+"_"+std::to_string(stepSize)+"_Pearson.txt", pvalue, corP, genomeConv, genomicCoordinates);
-		bs.storeSignificantSignal(outputPrefix+"Segmentation_"+geneID+"_"+std::to_string(stepSize)+"_Spearman.txt", pvalue, corS, genomeConv, genomicCoordinates);
+		bs.storeSignificantSignal(outputPrefix+"Peaks_"+geneID+"_"+"Pearson.txt", pvalue, corP, genomeConv, genomicCoordinates);
+		bs.storeSignificantSignal(outputPrefix+"Peaks_"+geneID+"_"+"Spearman.txt", pvalue, corS, genomeConv, genomicCoordinates);
 	}else{
 		if (corM=="Spearman"){
-			bs.storeSignificantSignal(outputPrefix+"Segmentation_"+geneID+"_"+corM+"_"+std::to_string(stepSize)+".txt", pvalue, corS, genomeConv, genomicCoordinates);
+			bs.storeSignificantSignal(outputPrefix+"Peaks_"+geneID+"_"+corM+".txt", pvalue, corS, genomeConv, genomicCoordinates);
 		}else{
-			bs.storeSignificantSignal(outputPrefix+"Segmentation_"+geneID+"_"+corM+"_"+std::to_string(stepSize)+".txt", pvalue, corP, genomeConv, genomicCoordinates);
+			bs.storeSignificantSignal(outputPrefix+"Peaks_"+geneID+"_"+corM+".txt", pvalue, corP, genomeConv, genomicCoordinates);
 		}
 	}
           if (verbose){
@@ -183,7 +178,6 @@ int main(int argc, char *argv[]){
 		std::cout<<gsr<<std::endl;
 		std::cout<<expR<<std::endl;
 		std::cout<<expO<<std::endl;
-		std::cout<<SPIG<<std::endl;	
 		std::cout<<bs<<std::endl;	
 		std::cout<<"Start	End	Pearson	pValue	Spearman	pValue"<<std::endl;
 		for (unsigned int i=0; i<genomeConv.size();i++){
