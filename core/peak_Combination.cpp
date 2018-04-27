@@ -147,6 +147,11 @@ int main(int argc, char *argv[]){
 	std::vector<std::pair<unsigned int, unsigned int> > genomeConv= pr.getOverlappingPeaks();
 	std::cout<<"Identified "<<genomeConv.size()<<" peaks within designated window."<<std::endl;
 
+	if (genomeConv.size()==0){
+		std::cout<<"No peaks found. Aborting."<<std::endl;
+		return 1;
+	}
+
 	//Loading original gene expression data
 	std::cout<<"Extracting original gene expression information for "<<geneID<<std::endl;
 	ExpressionReader expO(expressionOriginal);

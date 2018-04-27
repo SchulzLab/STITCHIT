@@ -22,12 +22,16 @@ class BinSelection{
 	public:
 	BinSelection(const std::string& path,std::map<std::string,double>& expressionMap);
 	void computeMeanSignal(std::string& chrom, const std::vector<std::pair<unsigned int, unsigned int> >& segments);
+	void computeMeanSignal(const std::vector<std::tuple<std::string, unsigned int, unsigned int> >& segments);
+
 	std::vector<std::vector<double> >& getMeanSignal();
 	std::vector<std::string>& getSampleNames();
 	std::vector<std::pair<double, double> > computePearsonCorrelation();
 	std::vector<std::pair<double, double> > computeSpearmanCorrelation();
 	std::vector<double> getExpressionVectorByNames();
 	void storeSignificantSignal(const std::string& filename, float threshold, std::vector<std::pair<double,double> > correlation,  std::vector<std::pair<unsigned int, unsigned int> > intervalPosition, std::tuple<std::string, unsigned int, unsigned int,std::string> );
+	void storeSignificantSignal(const std::string& filename, float threshold, std::vector<std::pair<double,double> > correlation,  std::vector<std::tuple<std::string, unsigned int, unsigned int> > intervalPosition, std::tuple<std::string, unsigned int, unsigned int,std::string> );
+
 	
 	std::vector<double> getSignalVectorBySegment(unsigned int segID);
           friend std::ostream& operator<<(std::ostream& os,const BinSelection& r);

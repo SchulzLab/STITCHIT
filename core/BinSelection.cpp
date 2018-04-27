@@ -51,6 +51,46 @@ void BinSelection::computeMeanSignal(std::string& chrom, const std::vector<std::
 	bwCleanup();
 }
 
+//IMPORTANT NOTE: This method transforms the first coordinate to the 0-based index used in bigWig.h. As bigWig.h works with half open intervalls, but SPAN provides closed intervalls, the second coordinate is not changed.
+void BinSelection::computeMeanSignal(const std::vector<std::tuple<std::string, unsigned int, unsigned int> >& segments){
+	 //Generating per base input for SPAN
+	if(bwInit(1<<17) != 0) throw std::runtime_error("Error occured in bwInit.");
+	//Iterating through all files in the specified directory
+	if (boost::filesystem::is_directory(path_)){
+		for(auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(path_), {})){
+			double *stats = NULL;
+			bigWigFile_t *fp = NULL;
+			std::string filenameS = entry.path().string();
+			char * filename= new char[filenameS.size() +1];
+			std::copy(filenameS.begin(),filenameS.end(), filename);
+			filename[filenameS.size()]='\0';
+			if (entry.path().extension().string() != ".bw") throw std::invalid_argument(filenameS+" is not a biwWig file. Expected file type is .bw");
+			//Check for presence of expression data for the current sample, otherwise ignore the sample!
+			std::vector<double> currentSample;
+			fp = bwOpen(filename, NULL, "r");
+			if(!fp) {
+				throw std::invalid_argument("An error occured while opening the bw files");
+			}
+			//We want ~1 bins in the range
+			sampleNames_.push_back(entry.path().stem().string());
+			for (auto& seg : segments){
+				std::string chrom = std::get<0>(seg);
+				char * chromC= new char[chrom.size()+1];
+				std::copy(chrom.begin(),chrom.end(), chromC);
+				chromC[chrom.size()]='\0';
+				stats = bwStats(fp, chromC, std::get<1>(seg)-1, std::get<2>(seg), 1, mean);
+				if(stats) {
+					currentSample.push_back(stats[0]);
+				}
+			}
+			free(stats);
+			bwClose(fp);
+			meanSignal_.push_back(currentSample);
+		}
+	}
+	bwCleanup();
+}
+
 
 std::vector<double> BinSelection::getExpressionVectorByNames(){
 	std::vector<double> expVecTemp;
@@ -147,6 +187,38 @@ void BinSelection::storeSignificantSignal(const std::string& filename, float thr
 		outfile<<"\t";
 		for (auto& item : validIndex){
 			outfile <<std::get<0>(genomePos)<<":"<<intervalPosition[item].first << "-" <<intervalPosition[item].second<<"\t";
+		}
+		outfile<<"Expression\n";
+		for (unsigned int sam = 0; sam < numSam; sam++){
+			outfile << sampleNames_[sam];
+			for (auto& item : validIndex){
+				outfile << "\t" <<  meanSignal_[sam][item];
+			}	
+		outfile <<"\t"<< expVecTemp[sam]<< '\n';
+		}
+		outfile.close();
+	}
+}
+
+void BinSelection::storeSignificantSignal(const std::string& filename, float threshold, std::vector<std::pair<double,double> > correlation,  std::vector<std::tuple<std::string, unsigned int, unsigned int> > intervalPosition,std::tuple<std::string, unsigned int, unsigned int,std::string> genomePos){
+	unsigned int numSam = meanSignal_.size();
+	std::vector<double> expVecTemp;
+	for (auto& sample : sampleNames_){
+		expVecTemp.push_back(expressionMap_[sample]);
+	}
+	std::vector<unsigned int> validIndex;
+	for (unsigned int index = 0; index< correlation.size(); index++){
+		if (correlation[index].second <= threshold){
+			validIndex.push_back(index);
+		}
+	}
+
+	if (not(validIndex.empty())){
+		std::ofstream outfile;
+		outfile.open(filename);	
+		outfile<<"\t";
+		for (auto& item : validIndex){
+			outfile <<std::get<0>(genomePos)<<":"<<std::get<1>(intervalPosition[item]) << "-" <<std::get<2>(intervalPosition[item])<<"\t";
 		}
 		outfile<<"Expression\n";
 		for (unsigned int sam = 0; sam < numSam; sam++){
