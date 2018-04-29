@@ -23,3 +23,7 @@ To execute all tests type:
 
 Tests can also be executed individually. They are located in the folder
 `build/test`
+
+
+## Acknowledgements
+This project is being funded by the Bundesministerium für Bildung und Forschung (BMBF) with project number 01DP17005 under the acronym EPIREG.
