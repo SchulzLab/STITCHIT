@@ -18,6 +18,8 @@ Fraction::Fraction(int s, int e, int sS, std::set<int> cat){
     // true after first iteration -- don't calculate costs or initial costs again
     weightsSet = false;
     merged = false;
+    initialData = 0.0;
+    initialBins = 0;
 }
 
 void Fraction::mergeIn(Fraction& f){

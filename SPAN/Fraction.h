@@ -16,7 +16,8 @@ public:
     int start, end, stepSize;
     bool weightsSet, merged;
     std::set<int> categories;
-    double initial, compressed;
+    double initial, compressed, initialData;
+    int initialBins;
     S::segmentation seg;
     datamap sse;
     datamap se;

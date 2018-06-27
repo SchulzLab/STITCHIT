@@ -92,6 +92,8 @@ void Binning::applyDPFlexi(int kbins, Fraction& f,bool exactK) const{
     // determine costs
     bestBinning = results[beta-1];
     double mc1 = modelCost(1, fSize);
+    f.initialBins = fSize;
+    f.initialData = bestBinning.totalCosts;
     bestBinning.totalCosts += mc1;
     f.initial = bestBinning.totalCosts;
     if(verbose)

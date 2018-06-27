@@ -10,6 +10,9 @@ std::vector<std::pair<unsigned int, unsigned int> > SPAN::runSpan(Data& d, int s
 	std::vector<Fraction> fractions;
 	parts=round(log2(d.n)); //Added by fschmidt
 	fractions.resize(parts); //Added by fschmidt
+    // track the costs for fractions
+    int numberOfInitialBins = 0;
+    double initialScore = 0.0;
 	if (verbose){
 		std::cout<<"Spitting into "<<parts<<" subproblems"<<std::endl;
 	}	
@@ -23,8 +26,11 @@ std::vector<std::pair<unsigned int, unsigned int> > SPAN::runSpan(Data& d, int s
 			Fraction f = Fraction(begin, end, s, d.getCategories());
 			bins.runSPAN(k, f, false);
 	  		fractions[i]=f; //Added by fschmidt
+            numberOfInitialBins += f.initialBins;
+            initialScore += f.initialData;
 		}
 	}
+    double initialCosts = initialScore + bins.modelCost(1,numberOfInitialBins);
 	
 	if (verbose){
 	std::cout<<"Merging into a second layer"<<std::endl;
@@ -67,6 +73,11 @@ std::vector<std::pair<unsigned int, unsigned int> > SPAN::runSpan(Data& d, int s
 	//Generate vector of tupels holding final binning
 	//run last run
 	bins.runSPAN(k, fAll,false);
+    
+    // get costs
+    double finalCosts = fAll.compressed;
+    // compression ratio
+    double compressionRatio = finalCosts / initialCosts;
 	
 	std::vector<std::pair<unsigned int, unsigned int> > resultVector;
 	for(unsigned int i = 0; i < fAll.seg.size(); i++){
