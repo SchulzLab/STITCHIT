@@ -74,11 +74,11 @@ std::vector<std::pair<unsigned int, unsigned int> > SPAN::runSpan(Data& d, int s
 	//run last run
 	bins.runSPAN(k, fAll,false);
     
-    // get costs
-    double finalCosts = fAll.compressed;
-    // compression ratio
-    double compressionRatio = finalCosts / initialCosts;
-	
+	// get costs
+	double finalCosts = fAll.compressed;
+	// compression ratio
+	double compressionRatio = finalCosts / initialCosts;
+	std::cout<<"Compression ratio: "<<compressionRatio<< "(from  "<<initialCosts << " to "<< finalCosts<<")"<<std::endl;
 	std::vector<std::pair<unsigned int, unsigned int> > resultVector;
 	for(unsigned int i = 0; i < fAll.seg.size(); i++){
  		resultVector.push_back(std::make_pair((fAll.seg)[i].start + 1,(fAll.seg)[i].end));

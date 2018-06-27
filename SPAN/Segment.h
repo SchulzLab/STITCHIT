@@ -25,15 +25,16 @@ protected:
     bool verbose;
     
     void applyDPFlexi(int, Fraction&, bool) const;
-    
     std::vector<int> Merge(std::vector<int>&,std::vector<int>&) const;
-    double modelCost(int,int) const;
     
 public:
     // constructors
     Binning(Data&,bool);
     void runSPAN(int, Fraction&, bool) const;
     void printSegmentation(S::segmentation) const;
+
+    double modelCost(int,int) const;
+
 };
 
 #endif
