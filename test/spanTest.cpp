@@ -22,10 +22,10 @@ class SPANTest : public ::testing::Test{
 };
 
 TEST_F(SPANTest, getElement){
-          d_.read_file(TEST_DATA_PATH("Integrated_featureMatrix_ENSG00000107581_5000.tab"),true,'g',1,false);
+     d_.read_file(TEST_DATA_PATH("Integrated_featureMatrix_ENSG00000107581_5000_V2.tab"),true,'g',1,false);
 	SPAN s_ = SPAN();
 	std::vector<std::pair<unsigned int, unsigned int> > resultVector = s_.runSpan(d_,1,2);
-	ASSERT_EQ(resultVector.size(),7);
+	ASSERT_EQ(resultVector.size(),5);
 }
 
 TEST_F(SPANTest,setDat){

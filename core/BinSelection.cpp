@@ -231,4 +231,3 @@ void BinSelection::storeSignificantSignal(const std::string& filename, float thr
 		outfile.close();
 	}
 }
-	

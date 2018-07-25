@@ -17,7 +17,7 @@ class SPAN {
     
 public:
 	SPAN(){};
-	std::vector<std::pair<unsigned int, unsigned int> > runSpan(Data& d, int s, unsigned int maxCores,bool verbose);
+	std::vector<std::pair<unsigned int, unsigned int> > runSpan(Data& d, int s, unsigned int maxCores,bool verbose,unsigned int stitchSegmentLength);
 	std::vector<std::pair<unsigned int, unsigned int> > convertSegmentationToGenomicCoordinates(std::vector<std::pair<unsigned int, unsigned int> >& segmentation, std::tuple<std::string, unsigned int, unsigned int,std::string> genomicCoordinates);
 };
 

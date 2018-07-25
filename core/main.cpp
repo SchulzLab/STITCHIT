@@ -34,6 +34,7 @@ int main(int argc, char *argv[]){
 	unsigned int sizeRestriction;
 	float pvalue;
 	bool verbose;
+	unsigned int stitchSegmentLength;
 	
 	boost::program_options::options_description desc("STITCH options");
 	desc.add_options()
@@ -52,6 +53,7 @@ int main(int argc, char *argv[]){
 		("prefix,f",boost::program_options::value<std::string>(&outputPrefix)->default_value(""),"Path were resulting files should be stored, defaults to STITCH source directory")
 		("verbose,v", boost::program_options::value<bool>(&verbose)->default_value(false), "True if additional status reports should be generated, false otherwise (default)")
 		("restriction,r",boost::program_options::value<unsigned int>(&sizeRestriction)->default_value(100000),"Maximum size of extension and gene length allowed, default is 100kb")
+		("stitchSegmentLength,t",boost::program_options::value<unsigned int>(&stitchSegmentLength)->default_value(5000),"Length of the subproblems considered in STITCH, default is 5kb")
 	;
 	
 	boost::program_options::variables_map vm;
@@ -138,7 +140,7 @@ int main(int argc, char *argv[]){
 	std::map<std::string, double> expressionMap;
 	expressionMap = expR.getExpressionMap();
 
-          //GenerateSPANInput
+	//GenerateSPANInput
 	std::cout<<"Generating input matrix using a search window extended by "<<window<<"bp up- and downstream of the gene"<<std::endl;
 	SPANInputGenerator SPIG(bigWigPath,expressionMap);
 	SPIG.generateSPANInput(genomicCoordinates);
@@ -146,11 +148,15 @@ int main(int argc, char *argv[]){
 	perBaseInputData = SPIG.getInputMatrix();
 	Data input = Data();
 	input.setData(perBaseInputData,true,'g',stepSize,false);
+	if (perBaseInputData[0].size()==1){
+		std::cout<<"No epigenetic data found"<<std::endl;
+		return 1;
+	}
 
 	//Feed input to SPAN and execute
 	std::cout<<"Segmentation in progress..."<<std::endl;
 	SPAN sp= SPAN();
-	std::vector<std::pair<unsigned int, unsigned int> > segments = sp.runSpan(input,stepSize,maxCores,verbose);
+	std::vector<std::pair<unsigned int, unsigned int> > segments = sp.runSpan(input,stepSize,maxCores,verbose,stitchSegmentLength);
 	//Convert to genomic coordinates
 	std::vector<std::pair<unsigned int, unsigned int> > genomeConv= sp.convertSegmentationToGenomicCoordinates(segments,genomicCoordinates);
 	
