@@ -23,7 +23,9 @@ class SPANInputGenerator{
 	void generateSPANInput(const std::tuple<std::string, unsigned int, unsigned int,std::string>& genomicCoordinates);
 	std::vector<std::vector<double>>& getInputMatrix();	
 	std::vector<std::string>& getSampleNames();
-          friend std::ostream& operator<<(std::ostream& os,const SPANInputGenerator& r);
+	bool isEmpty();
+
+     friend std::ostream& operator<<(std::ostream& os,const SPANInputGenerator& r);
 
 	private:
 	std::vector<double> parseIntervals(bwOverlappingIntervals_t *ints, uint32_t start, unsigned int exp, const unsigned int size);

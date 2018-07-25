@@ -145,21 +145,21 @@ int main(int argc, char *argv[]){
 	SPANInputGenerator SPIG(bigWigPath,expressionMap);
 	SPIG.generateSPANInput(genomicCoordinates);
 	std::vector<std::vector<double> > perBaseInputData;
-	perBaseInputData = SPIG.getInputMatrix();
 	Data input = Data();
-	input.setData(perBaseInputData,true,'g',stepSize,false);
-	if (perBaseInputData[0].size()==1){
+	if (SPIG.isEmpty()){
 		std::cout<<"No epigenetic data found"<<std::endl;
 		return 1;
 	}
-
+	else{
+		perBaseInputData = SPIG.getInputMatrix();
+		input.setData(perBaseInputData,true,'g',stepSize,false);
+	}
 	//Feed input to SPAN and execute
 	std::cout<<"Segmentation in progress..."<<std::endl;
 	SPAN sp= SPAN();
 	std::vector<std::pair<unsigned int, unsigned int> > segments = sp.runSpan(input,stepSize,maxCores,verbose,stitchSegmentLength);
 	//Convert to genomic coordinates
 	std::vector<std::pair<unsigned int, unsigned int> > genomeConv= sp.convertSegmentationToGenomicCoordinates(segments,genomicCoordinates);
-	
 	std::cout<<"Segmentation into "<<segments.size()<<" bins completed."<<std::endl;
 
 	//Loading original gene expression data
