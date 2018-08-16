@@ -205,7 +205,7 @@ double Data::GaussApprox(int i, int j, int label, Fraction& f) const{
     if(sse <= 0.0)
         return 0.0;
     sigma = std::sqrt(sse / (double) myweight);
-    double score = (myweight/2) * log2(sigma*sigma*2.0*M_PI) + ((myweight/2.0)*log(2.0)) + N * log2(resolution);
+    double score = (myweight/2) * log2(sigma*sigma*2.0*M_PI) + ((myweight/2.0)*log(2.0)) + myweight * log2(resolution);
     score = score < 0.0 ? 0.0 : score;
     return score;
 }
