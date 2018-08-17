@@ -27,17 +27,17 @@ std::vector<std::pair<unsigned int, unsigned int> > SPAN::runSpan(Data& d, int s
 			Fraction f = Fraction(begin, end, s, d.getCategories());
 			bins.runSPAN(k, f, false);
 	  		fractions[i]=f; //Added by fschmidt
-            numberOfInitialBins += f.initialBins;
-            initialScore += f.initial;//Data;
-		  compressedScore += f.compressed;
+		          numberOfInitialBins += f.initialBins;
+		          initialScore += f.initial;//Data;
+		 	compressedScore += f.compressed;
 		}
 	}else{
 		Fraction f = Fraction(0, 0 == (parts-1) ? d.n : stdwidth, s, d.getCategories());
           bins.runSPAN(k, f, false);
           fractions[0]=f; //Added by fschmidt
-		numberOfInitialBins = f.initialBins;
+	numberOfInitialBins = f.initialBins;
           initialScore = f.initial;//Data;
-		compressedScore = f.compressed;
+	compressedScore = f.compressed;
 	}
 
 	Fraction fAll = fractions[0];	
