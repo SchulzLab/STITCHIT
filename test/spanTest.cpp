@@ -25,7 +25,7 @@ TEST_F(SPANTest, getElement){
      d_.read_file(TEST_DATA_PATH("Integrated_featureMatrix_ENSG00000107581_5000_V2.tab"),true,'g',1,false);
 	SPAN s_ = SPAN();
 	std::vector<std::pair<unsigned int, unsigned int> > resultVector = s_.runSpan(d_,1,2);
-	ASSERT_EQ(resultVector.size(),5);
+	ASSERT_EQ(resultVector.size(),7);
 }
 
 TEST_F(SPANTest,setDat){
@@ -49,7 +49,7 @@ TEST_F(SPANTest,setMC){
 	d_.setData(sig.getInputMatrix(),true,'g',1,false);
 	SPAN s_ = SPAN();
 	std::vector<std::pair<unsigned int, unsigned int> > resultVector = s_.runSpan(d_);
-	ASSERT_EQ(resultVector.size(),6);
+	ASSERT_EQ(resultVector.size(),9);
 }
 
 TEST_F(SPANTest,coordConversion){

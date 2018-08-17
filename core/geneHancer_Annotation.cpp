@@ -40,7 +40,6 @@ int main(int argc, char *argv[]){
 		("bigWigPath,b", boost::program_options::value<std::string>(&bigWigPath), "Path to big wig files")
 		("annotationFile,a",boost::program_options::value<std::string>(&annotationFile), "Path to the annotation file that should be used")
 		("geneID,g",boost::program_options::value<std::string>(&geneID), "ID of the gene that should be segmented")
-		("expressionDiscretised,d",boost::program_options::value<std::string>(&expressionDiscretised), "File containing the discretised expression information")
 		("expressionOriginal,o",boost::program_options::value<std::string>(&expressionOriginal), "File containng the original expression information")
 		("genomeSizeFile,s",boost::program_options::value<std::string>(&genomeSizeFile), "File containig the size of the chromosomes of the reference genome")
 		("window,w",boost::program_options::value<unsigned int>(&window)->default_value(5000), "Size of the window considered upstream and downstream of the gene body, default is 5bk")
@@ -80,10 +79,6 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 
-	if (not(vm.count("expressionDiscretised"))){
-		std::cout<<"--expressionDiscretised is not specified. Please provide the path to a file containing discretised expression data with genes in the rows and samples in the columns. Note that multiclass classification is supported."<<std::endl;;		
-		return 1;
-	}
 
 	if (not(vm.count("expressionOriginal"))){
 		std::cout<<"--expressionOriginal is not specified. Please provide the path to a folder containing one big wig file per sample"<<std::endl;;		
@@ -132,14 +127,6 @@ int main(int argc, char *argv[]){
 		return 1;
 	}	
 
-	//Generating expression map
-	std::cout<<"Extracting discretised gene expression information for "<<geneID<<std::endl;
-	ExpressionReader expR(expressionDiscretised);
-	expR.loadExpressionData(geneID,false);
-	expR.checkDiversity();
-	std::map<std::string, double> expressionMap;
-	expressionMap = expR.getExpressionMap();
-
           //Generate window of associated enhancers
 	std::cout<<"Searching for known regulatory regions contained in GeneHancer"<<std::endl;
 	GeneHancerReader pr(peakFile);
@@ -181,7 +168,6 @@ int main(int argc, char *argv[]){
           if (verbose){
 		std::cout<<gtf<<std::endl;
 		std::cout<<gsr<<std::endl;
-		std::cout<<expR<<std::endl;
 		std::cout<<expO<<std::endl;
 		std::cout<<bs<<std::endl;	
 		std::cout<<"Start	End	Pearson	pValue	Spearman	pValue"<<std::endl;

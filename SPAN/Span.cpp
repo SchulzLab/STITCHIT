@@ -34,7 +34,7 @@ std::vector<std::pair<unsigned int, unsigned int> > SPAN::runSpan(Data& d, int s
           bins.runSPAN(k, f, false);
           fractions[0]=f; //Added by fschmidt
           initialScore = f.initial;//Data;
-		compressedScore = f.compressed;
+        compressedScore = f.compressed;
 	}
 
 	Fraction fAll = fractions[0];	
