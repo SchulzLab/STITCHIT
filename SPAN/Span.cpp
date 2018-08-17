@@ -12,7 +12,6 @@ std::vector<std::pair<unsigned int, unsigned int> > SPAN::runSpan(Data& d, int s
 	fractions.resize(parts); //Added by fschmidt
     // track the costs for fractions
 
-    int numberOfInitialBins = 0;
     double compressedScore= 0.0;
     double initialScore = 0.0;
 	if (verbose){
@@ -27,7 +26,6 @@ std::vector<std::pair<unsigned int, unsigned int> > SPAN::runSpan(Data& d, int s
 			Fraction f = Fraction(begin, end, s, d.getCategories());
 			bins.runSPAN(k, f, false);
 	  		fractions[i]=f; //Added by fschmidt
-            numberOfInitialBins += f.initialBins;
             initialScore += f.initial;//Data;
 		  compressedScore += f.compressed;
 		}
@@ -35,7 +33,6 @@ std::vector<std::pair<unsigned int, unsigned int> > SPAN::runSpan(Data& d, int s
 		Fraction f = Fraction(0, 0 == (parts-1) ? d.n : stdwidth, s, d.getCategories());
           bins.runSPAN(k, f, false);
           fractions[0]=f; //Added by fschmidt
-		numberOfInitialBins = f.initialBins;
           initialScore = f.initial;//Data;
 		compressedScore = f.compressed;
 	}

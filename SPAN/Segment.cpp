@@ -19,12 +19,10 @@ Binning::Binning(Data& d, bool v){
 double Binning::modelCost(int bins, int total) const{
 	assert(bins > 0);
 	double weightCutpoints = 0.0;
-	if(total == length)
-		weightCutpoints = S::log2nChoosek(total - 1, (bins - 1));
+    weightCutpoints = S::log2nChoosek(total - 1, (bins - 1));
 	double w_bins = S::log2N(bins);
 	double means = 0.0;
-	if(total == length) 
-		means = data.categoryCount() * bins * log2(std::abs(data.max - data.min) / (1.0 / (double) data.resolution));
+    means = data.categoryCount() * bins * log2(std::abs(data.max - data.min) / (1.0 / (double) data.resolution));
 	return w_bins + means + weightCutpoints;
 }
 
