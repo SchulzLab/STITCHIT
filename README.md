@@ -1,8 +1,8 @@
-# STITCH
+# STITCHIT
 Linking regulatory regions to genes
 
 ## Building the tool
-To build the **STICH** *cmake*, a C++11 compiler, and the boost library must be available.
+To build the **STITCHIT** *cmake*, a C++11 compiler, and the boost library must be available.
 
 Make sure you are in the projects main directory. Then, generate a build folder by typing:
 `mkdir build`
