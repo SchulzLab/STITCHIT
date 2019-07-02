@@ -1,6 +1,7 @@
 #ifndef EXPRESSIONREADER_H
 #define EXPRESSIONREADER_H
 
+#include <vector>
 #include <string>
 #include <map>
 #include <algorithm>

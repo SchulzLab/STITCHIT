@@ -44,7 +44,7 @@ std::vector<double> SPANInputGenerator::parseIntervals(bwOverlappingIntervals_t 
           uint32_t i;
           if(!ints) throw std::invalid_argument("Error in retrieving counts from bw files, please ensure the target chromosome is  present in all bw files");
           for(i=0; i<ints->l; i++) {
-		if (isnan(ints->value[i])){
+		if (std::isnan(ints->value[i])){
 			tempV=0;
 		} else tempV=ints->value[i];
 

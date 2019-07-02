@@ -3,12 +3,11 @@
 #include "CorComp.h"
 
 BinSelection::BinSelection(const std::string& path,std::map<std::string,double>& expressionMap)
-	:path_(path), expressionMap_(expressionMap)
+          :path_(path), expressionMap_(expressionMap)
 {
 	meanSignal_.resize(0);
 
 }
-
 
 
 //IMPORTANT NOTE: This method transforms the first coordinate to the 0-based index used in bigWig.h. As bigWig.h works with half open intervalls, but SPAN provides closed intervalls, the second coordinate is not changed.
@@ -87,6 +86,42 @@ void BinSelection::computeMeanSignal(const std::vector<std::tuple<std::string, u
 			bwClose(fp);
 			meanSignal_.push_back(currentSample);
 		}
+	}
+	bwCleanup();
+}
+
+//IMPORTANT NOTE: This method transforms the first coordinate to the 0-based index used in bigWig.h. As bigWig.h works with half open intervalls, but SPAN provides closed intervalls, the second coordinate is not changed.
+void BinSelection::computeMeanSignal(std::vector<std::tuple<std::string, unsigned int, unsigned int, std::string, float, float, float, float> >& segments){
+	 //Generating per base input for SPAN
+	if(bwInit(1<<17) != 0) throw std::runtime_error("Error occured in bwInit.");
+	//Iterating through all files in the specified directory
+	if (boost::filesystem::exists(path_)){
+		double *stats = NULL;
+		bigWigFile_t *fp = NULL;
+		//Check for presence of expression data for the current sample, otherwise ignore the sample!
+		std::vector<double> currentSample;
+		std::string filenameS = path_;
+		char * filename= new char[filenameS.size() +1];
+		std::copy(filenameS.begin(),filenameS.end(), filename);
+		filename[filenameS.size()]='\0';
+		fp = bwOpen(filename, NULL, "r");
+		if(!fp) {
+			throw std::invalid_argument("An error occured while opening the bw files");
+		}
+		//We want ~1 bins in the range
+		for (auto& seg : segments){
+			std::string chrom = std::get<0>(seg);
+			char * chromC= new char[chrom.size()+1];
+			std::copy(chrom.begin(),chrom.end(), chromC);
+			chromC[chrom.size()]='\0';
+			stats = bwStats(fp, chromC, std::get<1>(seg)-1, std::get<2>(seg), 1, mean);
+			if(stats) {
+				std::get<6>(seg)=stats[0];
+				std::get<7>(seg)=stats[0]*std::get<4>(seg);
+			}
+		}
+		free(stats);
+		bwClose(fp);
 	}
 	bwCleanup();
 }

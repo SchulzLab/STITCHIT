@@ -11,6 +11,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+#include <cmath>
 #include <map>
 #include <tuple>
 #include <boost/filesystem.hpp>

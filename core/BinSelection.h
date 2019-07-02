@@ -23,6 +23,7 @@ class BinSelection{
 	BinSelection(const std::string& path,std::map<std::string,double>& expressionMap);
 	void computeMeanSignal(std::string& chrom, const std::vector<std::pair<unsigned int, unsigned int> >& segments);
 	void computeMeanSignal(const std::vector<std::tuple<std::string, unsigned int, unsigned int> >& segments);
+	void computeMeanSignal(std::vector<std::tuple<std::string, unsigned int, unsigned int, std::string, float, float, float, float> >& segments);
 
 	std::vector<std::vector<double> >& getMeanSignal();
 	std::vector<std::string>& getSampleNames();
