@@ -54,18 +54,6 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 
-/*	if (not(vm.count("expressionOriginal"))){
-		std::cout<<"--expressionOriginal is not specified. Please provide the path to a folder containing one big wig file per sample"<<std::endl;;		
-		return 1;
-	}
-
-	if (vm.count("correlationMeasure")){
-		if ((corM != "Pearson") and (corM != "Spearman") and (corM != "Both")){
-			std::cout<<"Please specify a valid correlation measure: Both, Pearson or Spearman"<<std::endl;;		
-			return 1;
-		}
-	}
-*/
 	if (vm.count("prefix")){
 		if ((outputPrefix[outputPrefix.size()]!='/') and (outputPrefix.size()>1)){
 			std::cout<<"Results will be stored in "<<outputPrefix<<std::endl;
@@ -110,10 +98,6 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-/*	//Loading original gene expression data
-	std::cout<<"Extracting original gene expression information for "<<geneID<<std::endl;
-	ExpressionReader expO(expressionOriginal);
-	expO.loadExpressionData(geneID,false);*/
 	std::map<std::string, double> expressionMapO;// = expO.getExpressionMap();
 
 
@@ -131,32 +115,5 @@ int main(int argc, char *argv[]){
 			std::cout<<std::get<0>(regulatoryElements[fileNames[i]][j])<<"	"<<std::get<1>(regulatoryElements[fileNames[i]][j])<<"	"<<std::get<2>(regulatoryElements[fileNames[i]][j])<<"	"<<std::get<3>(regulatoryElements[fileNames[i]][j])<<"	"<<std::get<4>(regulatoryElements[fileNames[i]][j])<<"	"<<std::get<5>(regulatoryElements[fileNames[i]][j])<<"	"<<std::get<6>(regulatoryElements[fileNames[i]][j])<<"	"<<std::get<7>(regulatoryElements[fileNames[i]][j])<<std::endl;
 		}
 	}
-
-/*	//Assess correlation of signal in bins to gene expression
-	std::vector<std::pair<double,double> > corP = bs.computePearsonCorrelation();
-	std::vector<std::pair<double,double> > corS = bs.computeSpearmanCorrelation();
-	//Generate a txt file with DNase-seq signal and gene expression across samples for the gene of interest in the significant segments including sample IDs and genomic location
-	if (corM=="Both"){
-		bs.storeSignificantSignal(outputPrefix+"Peaks_"+geneID+"_"+"Pearson.txt", pvalue, corP, genomeConv, genomicCoordinates);
-		bs.storeSignificantSignal(outputPrefix+"Peaks_"+geneID+"_"+"Spearman.txt", pvalue, corS, genomeConv, genomicCoordinates);
-	}else{
-		if (corM=="Spearman"){
-			bs.storeSignificantSignal(outputPrefix+"Peaks_"+geneID+"_"+corM+".txt", pvalue, corS, genomeConv, genomicCoordinates);
-		}else{
-			bs.storeSignificantSignal(outputPrefix+"Peaks_"+geneID+"_"+corM+".txt", pvalue, corP, genomeConv, genomicCoordinates);
-		}
-	}
-          if (verbose){
-		std::cout<<gtf<<std::endl;
-		std::cout<<gsr<<std::endl;
-		std::cout<<expO<<std::endl;
-		std::cout<<bs<<std::endl;	
-		std::cout<<"Start	End	Pearson	pValue	Spearman	pValue"<<std::endl;
-		for (unsigned int i=0; i<genomeConv.size();i++){
-			std::cout<<genomeConv[i].first<<"	"<<genomeConv[i].second<<"	"<<corP[i].first<<"	"<<corP[i].second<<"	"<<corS[i].first<<"	"<<corS[i].second<<std::endl;
-		}
-
-	}
-*/	
 	return 0;
 } 

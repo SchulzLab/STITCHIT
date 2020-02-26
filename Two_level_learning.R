@@ -31,7 +31,7 @@ if("--help" %in% args) {
 	--logResponse Flag indicating whether the response variable should be log transformed (default TRUE)
 	--ftest Flag indicating whether partial F-test should be computed to assess the significance of each feature (default FALSE)
 	--modelQ q-value threshold for model selection (default 0.05)
-	--coefP p-value threshold for model coefficient (default 0.05)
+	--coefP p-value threshold for model coefficient (default 1, all OLS coefs will be returned)
 	--help=print this text
 ")
 	q(save="no")
@@ -643,7 +643,7 @@ for(Sample in FileList){
 		ols_Data<-M[,c(which(medianModelCoefMatrix!=0),Response_Variable_location)]
 		model<-lm(Expression~.,ols_Data)	
 		model.coefs<-summary(model)$coefficients[,c(1,4)]
-		signif.coefs<-which(model.coefs[,2]<as.numeric(argsL$coefP))
+		signif.coefs<-which(model.coefs[,2]<=as.numeric(argsL$coefP))
 		model.coefs.signif<-model.coefs[signif.coefs,]
 		if (length(signif.coefs > 0)){
 			for (j in  1:length(row.names(model.coefs.signif))){
