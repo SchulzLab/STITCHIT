@@ -30,7 +30,6 @@ if("--help" %in% args) {
 	--randomise Randomise the feature matrix (default FALSE) 
 	--logResponse Flag indicating whether the response variable should be log transformed (default TRUE)
 	--ftest Flag indicating whether partial F-test should be computed to assess the significance of each feature (default FALSE)
-	--modelQ q-value threshold for model selection (default 0.05)
 	--coefP p-value threshold for model coefficient (default 1, all OLS coefs will be returned)
 	--help=print this text
 ")
@@ -93,10 +92,6 @@ if(is.null(argsL$cores)) {
 
 if(is.null(argsL$coefP)) {
 	argsL$coefP <- 0.05
-}
-
-if(is.null(argsL$modelQ)) {
-	argsL$modelQ <- 0.05
 }
 
 if(is.null(argsL$regularisation)){
@@ -638,9 +633,14 @@ for(Sample in FileList){
 		}
 	if (length(modelCoefMatrix) != 0){
 	medianModelCoefMatrix<-apply(modelCoefMatrix,2,median)[-1]
+	nOBs<-dim(M)[1]
 	# Partition data into test and training data sets
 	if (length(which(medianModelCoefMatrix!=0))){
-		ols_Data<-M[,c(which(medianModelCoefMatrix!=0),Response_Variable_location)]
+		if (length(which(medianModelCoefMatrix!=0))>=nObs){
+			ols_Data<-M[,c(order(abs(medianModelCoefMatrix),decreasing=T)[1:(nObs-2)],Response_Variable_location)]
+		}else{
+			ols_Data<-M[,c(which(medianModelCoefMatrix!=0),Response_Variable_location)]
+			} 
 		model<-lm(Expression~.,ols_Data)	
 		model.coefs<-summary(model)$coefficients[,c(1,4)]
 		signif.coefs<-which(model.coefs[,2]<=as.numeric(argsL$coefP))
