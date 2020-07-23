@@ -101,7 +101,7 @@ Q: Where can I get the data from the manuscript?
 A: The data is available online at zenodo (10.5281/zenodo.2547383)
 
 
-Q: What should I cite STITCHIT?
+Q: How should I cite STITCHIT?
 
 A: You can cite our bioRxiv article: [doi.org/10.1101/585125](https://www.biorxiv.org/content/10.1101/585125v1.full)
 
