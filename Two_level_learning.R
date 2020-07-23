@@ -633,7 +633,7 @@ for(Sample in FileList){
 		}
 	if (length(modelCoefMatrix) != 0){
 	medianModelCoefMatrix<-apply(modelCoefMatrix,2,median)[-1]
-	nOBs<-dim(M)[1]
+	nObs<-dim(M)[1]
 	# Partition data into test and training data sets
 	if (length(which(medianModelCoefMatrix!=0))){
 		if (length(which(medianModelCoefMatrix!=0))>=nObs){
