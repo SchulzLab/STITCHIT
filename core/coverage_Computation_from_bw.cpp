@@ -39,7 +39,7 @@ int main(int argc, char *argv[]){
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
 	boost::program_options::notify(vm);
 
-	if (argc <= 8){
+	if (argc <= 2){
 		std::cout<<desc<<std::endl;
 		return 1;
 	}
