@@ -8,7 +8,8 @@
 #include "boost/program_options/options_description.hpp"
 #include "boost/program_options/variables_map.hpp"
 #include "boost/program_options/parsers.hpp"
-
+#include <random>
+#include <algorithm>
 /*
 argv1 path to bigwig (bw) files
 argv2 gene annotation in gencode format
@@ -35,6 +36,8 @@ int main(int argc, char *argv[]){
 	float pvalue;
 	bool verbose;
 	unsigned int stitchSegmentLength;
+	unsigned int downsampleSize;
+	std::vector<unsigned int> consideredSamples;
 	
 	boost::program_options::options_description desc("STITCH options");
 	desc.add_options()
@@ -54,6 +57,7 @@ int main(int argc, char *argv[]){
 		("verbose,v", boost::program_options::value<bool>(&verbose)->default_value(false), "True if additional status reports should be generated, false otherwise (default)")
 		("restriction,r",boost::program_options::value<unsigned int>(&sizeRestriction)->default_value(100000),"Maximum size of extension and gene length allowed, default is 100kb")
 		("stitchSegmentLength,t",boost::program_options::value<unsigned int>(&stitchSegmentLength)->default_value(5000),"Length of the subproblems considered in STITCH, default is 5kb")
+		("downsample,n",boost::program_options::value<unsigned int>(&downsampleSize)->default_value(100),"Percent of the data to be use for STITCHIT, default is 100%, the entire data set")
 	;
 	
 	boost::program_options::variables_map vm;
@@ -109,10 +113,14 @@ int main(int argc, char *argv[]){
 
 	if (vm.count("prefix")){
 		if ((outputPrefix[outputPrefix.size()]!='/') and (outputPrefix.size()>1)){
-			std::cout<<"Results will be stored in "<<outputPrefix<<std::endl;
+			if (verbose){
+				std::cout<<"Results will be stored in "<<outputPrefix<<std::endl;
+			}
 			outputPrefix+="/";
 		}
 	}
+
+	
 
 	//Loading genome size file
 	GenomeSizeReader gsr(genomeSizeFile);
@@ -121,29 +129,57 @@ int main(int argc, char *argv[]){
 	genomeSize = gsr.getGenomeSize();
 
 	//Reading the annotation file to retrieve gene coordinates
-	std::cout<<"Looking up genomic coordinates for "<<geneID<<std::endl;
+	if (verbose){
+		std::cout<<"Looking up genomic coordinates for "<<geneID<<std::endl;
+	}else{
+		std::cout<<geneID<<"\t";
+	}
 	GTFReader gtf(annotationFile,genomeSize,window);
 	gtf.findGenomicLocation(geneID);
 	std::tuple<std::string, unsigned int, unsigned int,std::string> genomicCoordinates;
 	genomicCoordinates = gtf.getGenomicLocation();
-	std::cout<<"Coordinates found: "<<std::get<0>(genomicCoordinates)<<" "<<std::get<1>(genomicCoordinates)+window<<" "<<std::get<2>(genomicCoordinates)-window<<", window length: "<<std::get<2>(genomicCoordinates)-std::get<1>(genomicCoordinates)<<std::endl;
+	if (verbose){
+		std::cout<<"Coordinates found: "<<std::get<0>(genomicCoordinates)<<" "<<std::get<1>(genomicCoordinates)+window<<" "<<std::get<2>(genomicCoordinates)-window<<", window length: "<<std::get<2>(genomicCoordinates)-std::get<1>(genomicCoordinates)<<std::endl;
+	}
 	if(std::get<2>(genomicCoordinates)-std::get<1>(genomicCoordinates)>sizeRestriction){
 		std::cout<<"Window is exceeding size limit of "<<sizeRestriction<<". Aborting."<<std::endl;
 		return 1;
 	}	
 
 	//Generating expression map
-	std::cout<<"Extracting discretised gene expression information for "<<geneID<<std::endl;
+	if (verbose){
+		std::cout<<"Extracting discretised gene expression information for "<<geneID<<std::endl;
+	}
 	ExpressionReader expR(expressionDiscretised);
 	expR.loadExpressionData(geneID,false);
 	expR.checkDiversity();
 	std::map<std::string, double> expressionMap;
 	expressionMap = expR.getExpressionMap();
 
+	//Determine number of samples to be included
+	unsigned int nSamples = (downsampleSize / 100.0)*(expressionMap.size());
+	if (verbose){
+		std::cout<<"Considering "<<nSamples<<" of "<<expressionMap.size()<<" samples ("<<downsampleSize<<")."<<std::endl;
+	}else{
+		std::cout<<downsampleSize<<"\t"<<nSamples<<"\t";
+	}
+
+	std::vector<unsigned int> tmp (nSamples);
+	std::iota(tmp.begin(), tmp.end(), 0);
+	std::vector<unsigned int> sVector(nSamples);
+	if (downsampleSize != 100){
+		std::random_device rd;
+		std::mt19937 g(rd());
+		std::shuffle(tmp.begin(), tmp.end(), g);
+	}
+ 	std::copy(tmp.begin(), tmp.begin()+nSamples, sVector.begin());	
+
 	//GenerateSPANInput
-	std::cout<<"Generating input matrix using a search window extended by "<<window<<"bp up- and downstream of the gene"<<std::endl;
+	if (verbose){
+		std::cout<<"Generating input matrix using a search window extended by "<<window<<"bp up- and downstream of the gene"<<std::endl;
+	}
 	SPANInputGenerator SPIG(bigWigPath,expressionMap);
-	SPIG.generateSPANInput(genomicCoordinates);
+	SPIG.generateSPANInput(genomicCoordinates,sVector);
 	std::vector<std::vector<double> > perBaseInputData;
 	Data input = Data();
 	if (SPIG.isEmpty()){
@@ -155,24 +191,36 @@ int main(int argc, char *argv[]){
 		input.setData(perBaseInputData,true,'g',stepSize,false);
 	}
 	//Feed input to SPAN and execute
-	std::cout<<"Segmentation in progress..."<<std::endl;
+	if (verbose){
+		std::cout<<"Segmentation in progress..."<<std::endl;
+	}
 	SPAN sp= SPAN();
 	std::vector<std::pair<unsigned int, unsigned int> > segments = sp.runSpan(input,stepSize,maxCores,verbose,stitchSegmentLength);
 	//Convert to genomic coordinates
 	std::vector<std::pair<unsigned int, unsigned int> > genomeConv= sp.convertSegmentationToGenomicCoordinates(segments,genomicCoordinates);
-	std::cout<<"Segmentation into "<<segments.size()<<" bins completed."<<std::endl;
+	if (verbose){
+		std::cout<<"Segmentation into "<<segments.size()<<" bins completed."<<std::endl;
+	}else{
+		std::cout<<segments.size()<<"\t";
+	}
 
 	//Loading original gene expression data
-	std::cout<<"Extracting original gene expression information for "<<geneID<<std::endl;
+	if(verbose){
+		std::cout<<"Extracting original gene expression information for "<<geneID<<std::endl;
+	}
 	ExpressionReader expO(expressionOriginal);
 	expO.loadExpressionData(geneID,false);
 	std::map<std::string, double> expressionMapO = expO.getExpressionMap();
 
 	//Compute signal in segmented regions
-	std::cout<<"Computing mean signal per bin and sample"<<std::endl;
+	if (verbose){
+		std::cout<<"Computing mean signal per bin and sample"<<std::endl;
+	}
 	BinSelection bs = BinSelection(bigWigPath,expressionMapO);
-	bs.computeMeanSignal(std::get<0>(genomicCoordinates), genomeConv);
-	std::cout<<"Computing correlation between signal and gene expression"<<std::endl;
+	bs.computeMeanSignal(std::get<0>(genomicCoordinates), genomeConv, sVector);
+	if (verbose){
+		std::cout<<"Computing correlation between signal and gene expression"<<std::endl;
+	}
 	//Assess correlation of signal in bins to gene expression
 	std::vector<std::pair<double,double> > corP = bs.computePearsonCorrelation();
 	std::vector<std::pair<double,double> > corS = bs.computeSpearmanCorrelation();
@@ -187,7 +235,7 @@ int main(int argc, char *argv[]){
 			bs.storeSignificantSignal(outputPrefix+"Segmentation_"+geneID+"_"+corM+"_"+std::to_string(stepSize)+".txt", pvalue, corP, genomeConv, genomicCoordinates);
 		}
 	}
-          if (verbose){
+	if (verbose){
 		std::cout<<gtf<<std::endl;
 		std::cout<<gsr<<std::endl;
 		std::cout<<expR<<std::endl;
@@ -198,7 +246,8 @@ int main(int argc, char *argv[]){
 		for (unsigned int i=0; i<genomeConv.size();i++){
 			std::cout<<genomeConv[i].first<<"	"<<genomeConv[i].second<<"	"<<corP[i].first<<"	"<<corP[i].second<<"	"<<corS[i].first<<"	"<<corS[i].second<<std::endl;
 		}
-
+	}else{
+		std::cout<<bs.getNumberOfSignificantSegments(pvalue,corS)<<std::endl;
 	}
 	
 	return 0;

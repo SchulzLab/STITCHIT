@@ -68,6 +68,60 @@ std::vector<double> SPANInputGenerator::parseIntervals(bwOverlappingIntervals_t 
  * @return
  * @throw
  */
+void SPANInputGenerator::generateSPANInput(const std::tuple<std::string, unsigned int, unsigned int, std::string>& genomicCoordinates, const std::vector<unsigned int>& sVector){
+          //Generating per base input for SPAN
+          if(bwInit(1<<17) != 0) throw std::runtime_error("Error occured in bwInit.");
+		unsigned int counter = 0;
+          //Iterating through all files in the specified directory
+          if (boost::filesystem::is_directory(path_)){
+                    for(auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(path_), {})){
+                              bigWigFile_t *fp = NULL;
+                              bwOverlappingIntervals_t *intervals = NULL;
+                              std::string filenameS = entry.path().string();
+                              char * filename= new char[filenameS.size() +1];
+                              std::copy(filenameS.begin(),filenameS.end(), filename);
+                              filename[filenameS.size()]='\0';
+						if (entry.path().extension().string() != ".bw"){
+							throw std::invalid_argument(filenameS+" is not a biwWig file. Expected file type is .bw");
+						}
+						if (*find(sVector.begin(), sVector.end(), counter) == counter){
+	                              //Check for presence of expression data for the current sample, otherwise ignore the sample!
+     		     			if (expressionMap_.find(entry.path().stem().string()) != expressionMap_.end()){
+									sampleNames_.push_back(entry.path().stem().string());
+               	                         std::vector<double> currentVec;
+                    	                    //Openning bw file and printing data
+                         		               fp = bwOpen(filename, NULL, "r");
+                                   	     if(!fp) throw std::invalid_argument("The bigwig file "+filenameS+" could not be opened.");
+                                        	
+	                                        char * chromosome_c_str = new char[std::get<0>(genomicCoordinates).size() + 1];
+     	                                   std::copy(std::get<0>(genomicCoordinates).begin(), std::get<0>(genomicCoordinates).end(), chromosome_c_str);
+          	                              chromosome_c_str[std::get<0>(genomicCoordinates).size()] = '\0'; // don't forget the terminating 0
+               	                         intervals = bwGetValues(fp,chromosome_c_str,std::get<1>(genomicCoordinates)-1,std::get<2>(genomicCoordinates)-1,1);
+                    	                    currentVec=parseIntervals(intervals,0,expressionMap_[entry.path().stem().string()],(std::get<2>(genomicCoordinates))-(std::get<1>(genomicCoordinates)));
+                         	               bwDestroyOverlappingIntervals(intervals);
+                              	          delete[] chromosome_c_str;
+	                                        bwClose(fp);
+     	                                   bwCleanup();
+									currentVec.push_back(expressionMap_[entry.path().stem().string()]);
+               	                         inputMatrix_.push_back(currentVec);
+                    	          }else{
+                         	               throw std::invalid_argument("No expression information available for "+filenameS);
+                         	     }
+						}
+						counter += 1;
+                    }
+          }else{
+                    throw std::invalid_argument("You did not specifiy a directory containing bigwig files.");
+          }
+}
+
+/*! \brief Brief description.
+ *         Brief description continued.
+ *  Detailed description starts here.
+ * @param
+ * @return
+ * @throw
+ */
 void SPANInputGenerator::generateSPANInput(const std::tuple<std::string, unsigned int, unsigned int,std::string>& genomicCoordinates){
           //Generating per base input for SPAN
           if(bwInit(1<<17) != 0) throw std::runtime_error("Error occured in bwInit.");

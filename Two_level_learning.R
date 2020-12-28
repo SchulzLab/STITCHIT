@@ -91,7 +91,7 @@ if(is.null(argsL$cores)) {
 }
 
 if(is.null(argsL$coefP)) {
-	argsL$coefP <- 0.05
+	argsL$coefP <- 1
 }
 
 if(is.null(argsL$regularisation)){

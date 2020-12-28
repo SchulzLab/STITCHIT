@@ -21,6 +21,7 @@
 class BinSelection{
 	public:
 	BinSelection(const std::string& path,std::map<std::string,double>& expressionMap);
+	void computeMeanSignal(std::string& chrom, const std::vector<std::pair<unsigned int, unsigned int> >& segments, const std::vector<unsigned int>& sVector);
 	void computeMeanSignal(std::string& chrom, const std::vector<std::pair<unsigned int, unsigned int> >& segments);
 	void computeMeanSignal(const std::vector<std::tuple<std::string, unsigned int, unsigned int> >& segments);
 	void computeMeanSignal(std::vector<std::tuple<std::string, unsigned int, unsigned int, std::string, float, float, float, float> >& segments);
@@ -32,7 +33,7 @@ class BinSelection{
 	std::vector<double> getExpressionVectorByNames();
 	void storeSignificantSignal(const std::string& filename, float threshold, std::vector<std::pair<double,double> > correlation,  std::vector<std::pair<unsigned int, unsigned int> > intervalPosition, std::tuple<std::string, unsigned int, unsigned int,std::string> );
 	void storeSignificantSignal(const std::string& filename, float threshold, std::vector<std::pair<double,double> > correlation,  std::vector<std::tuple<std::string, unsigned int, unsigned int> > intervalPosition, std::tuple<std::string, unsigned int, unsigned int,std::string> );
-
+	unsigned int getNumberOfSignificantSegments(float threshold, std::vector<std::pair<double,double> > correlation);
 	
 	std::vector<double> getSignalVectorBySegment(unsigned int segID);
           friend std::ostream& operator<<(std::ostream& os,const BinSelection& r);
