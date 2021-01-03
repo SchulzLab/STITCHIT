@@ -2,6 +2,8 @@ project (STITCHCore CXX)
 
 add_executable (STITCH main.cpp GenomeSizeReader.cpp ExpressionReader.cpp GTFReader.cpp SPANInputGenerator.cpp CorComp.cpp BinSelection.cpp)
 
+add_executable (TEST_DATA_GENERATOR testDataGeneration.cpp ExpressionReader.cpp GTFReader.cpp CorComp.cpp BinSelection.cpp RemReader.cpp)
+
 add_executable (UNIFIED_PEAKS peak_Combination.cpp GenomeSizeReader.cpp ExpressionReader.cpp GTFReader.cpp CorComp.cpp BinSelection.cpp PeakReader.cpp)
 
 add_executable (GENEHANCER geneHancer_Annotation.cpp GenomeSizeReader.cpp ExpressionReader.cpp GTFReader.cpp CorComp.cpp BinSelection.cpp GeneHancerReader.cpp)
@@ -12,3 +14,4 @@ target_link_libraries (STITCH BigWig ${Boost_LIBRARIES} SPAN)
 target_link_libraries (UNIFIED_PEAKS BigWig ${Boost_LIBRARIES})
 target_link_libraries (GENEHANCER BigWig ${Boost_LIBRARIES})
 target_link_libraries (REMSELECT BigWig ${Boost_LIBRARIES})
+target_link_libraries (TEST_DATA_GENERATOR BigWig ${Boost_LIBRARIES})

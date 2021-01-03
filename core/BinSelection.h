@@ -24,6 +24,7 @@ class BinSelection{
 	void computeMeanSignal(std::string& chrom, const std::vector<std::pair<unsigned int, unsigned int> >& segments, const std::vector<unsigned int>& sVector);
 	void computeMeanSignal(std::string& chrom, const std::vector<std::pair<unsigned int, unsigned int> >& segments);
 	void computeMeanSignal(const std::vector<std::tuple<std::string, unsigned int, unsigned int> >& segments);
+	void computeMeanSignal(const std::vector<std::tuple<std::string, unsigned int, unsigned int> >& segments, const std::vector<unsigned int>& sVector);
 	void computeMeanSignal(std::vector<std::tuple<std::string, unsigned int, unsigned int, std::string, float, float, float, float> >& segments);
 
 	std::vector<std::vector<double> >& getMeanSignal();
@@ -31,8 +32,11 @@ class BinSelection{
 	std::vector<std::pair<double, double> > computePearsonCorrelation();
 	std::vector<std::pair<double, double> > computeSpearmanCorrelation();
 	std::vector<double> getExpressionVectorByNames();
-	void storeSignificantSignal(const std::string& filename, float threshold, std::vector<std::pair<double,double> > correlation,  std::vector<std::pair<unsigned int, unsigned int> > intervalPosition, std::tuple<std::string, unsigned int, unsigned int,std::string> );
-	void storeSignificantSignal(const std::string& filename, float threshold, std::vector<std::pair<double,double> > correlation,  std::vector<std::tuple<std::string, unsigned int, unsigned int> > intervalPosition, std::tuple<std::string, unsigned int, unsigned int,std::string> );
+	void storeSignal(const std::string& filename, const std::vector<std::tuple<std::string, unsigned int, unsigned int> >& segments);
+	void storeSignificantSignal(const std::string& filename, float threshold, std::vector<std::pair<double,double> > correlation,  
+		std::vector<std::pair<unsigned int, unsigned int> > intervalPosition, std::tuple<std::string, unsigned int, unsigned int,std::string> );
+	void storeSignificantSignal(const std::string& filename, float threshold, std::vector<std::pair<double,double> > correlation,  
+		std::vector<std::tuple<std::string, unsigned int, unsigned int> > intervalPosition, std::tuple<std::string, unsigned int, unsigned int,std::string> );
 	unsigned int getNumberOfSignificantSegments(float threshold, std::vector<std::pair<double,double> > correlation);
 	
 	std::vector<double> getSignalVectorBySegment(unsigned int segID);

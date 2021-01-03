@@ -10,6 +10,8 @@
 #include "boost/program_options/parsers.hpp"
 #include <random>
 #include <algorithm>
+#include <cctype>
+
 /*
 argv1 path to bigwig (bw) files
 argv2 gene annotation in gencode format
@@ -29,6 +31,7 @@ int main(int argc, char *argv[]){
 	std::string genomeSizeFile;
 	std::string corM;
 	std::string outputPrefix;
+	std::string sampleVector;
 	unsigned int window;
 	unsigned int stepSize;
 	unsigned int maxCores;
@@ -37,9 +40,8 @@ int main(int argc, char *argv[]){
 	bool verbose;
 	unsigned int stitchSegmentLength;
 	unsigned int downsampleSize;
-	std::vector<unsigned int> consideredSamples;
 	
-	boost::program_options::options_description desc("STITCH options");
+	boost::program_options::options_description desc("STITCHIT options");
 	desc.add_options()
 		("help","Show help message")
 		("bigWigPath,b", boost::program_options::value<std::string>(&bigWigPath), "Path to big wig files")
@@ -58,6 +60,7 @@ int main(int argc, char *argv[]){
 		("restriction,r",boost::program_options::value<unsigned int>(&sizeRestriction)->default_value(100000),"Maximum size of extension and gene length allowed, default is 100kb")
 		("stitchSegmentLength,t",boost::program_options::value<unsigned int>(&stitchSegmentLength)->default_value(5000),"Length of the subproblems considered in STITCH, default is 5kb")
 		("downsample,n",boost::program_options::value<unsigned int>(&downsampleSize)->default_value(100),"Percent of the data to be use for STITCHIT, default is 100%, the entire data set")
+		("sampleVector,y",boost::program_options::value<std::string>(&sampleVector),"Binary vector indicating which samples are to be used for training. All samples are used if this option is not specified (Default NULL).")
 	;
 	
 	boost::program_options::variables_map vm;
@@ -120,6 +123,10 @@ int main(int argc, char *argv[]){
 		}
 	}
 
+	if (vm.count("sampleVector")){
+		sampleVector.clear();
+	}
+
 	
 
 	//Loading genome size file
@@ -171,8 +178,19 @@ int main(int argc, char *argv[]){
 		std::random_device rd;
 		std::mt19937 g(rd());
 		std::shuffle(tmp.begin(), tmp.end(), g);
+	 	std::copy(tmp.begin(), tmp.begin()+nSamples, sVector.begin());	
+	} else { 
+		if (sampleVector.empty()){
+		 	std::copy(tmp.begin(), tmp.begin()+nSamples, sVector.begin());	
+		}else{
+			sVector.resize(0);
+			for (unsigned int i=0; i<sampleVector.size(); i++){
+				if (sampleVector[i]=='1'){
+					sVector.push_back(i);
+				}
+			}
+		} 
 	}
- 	std::copy(tmp.begin(), tmp.begin()+nSamples, sVector.begin());	
 
 	//GenerateSPANInput
 	if (verbose){
