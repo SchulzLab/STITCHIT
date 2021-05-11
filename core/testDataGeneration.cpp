@@ -83,7 +83,7 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-	if (vm.count("sampleVector")){
+	if (not(vm.count("sampleVector"))){
 		std::cout<<"sampleVector is not specified. Please provide a binary vector indicating which samples in the bigWigPath are to be used as test cases for the linear model"<<std::endl;;		
 		return 1;
 

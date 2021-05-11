@@ -123,7 +123,7 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-	if (vm.count("sampleVector")){
+	if (not(vm.count("sampleVector"))){
 		sampleVector.clear();
 	}
 
