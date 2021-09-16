@@ -144,12 +144,12 @@ A: Make sure that the symbolic links of your compilers are set properly. We have
 
 Q: Where can I get the data from the manuscript?
 
-A: The data is available online at zenodo (10.5281/zenodo.2547383). You can also access predicted REM-gene associations and other information through the (Epiregio database) [https://epiregio.de]. Please cite (Baumgarten et al. 2020)[https://academic.oup.com/nar/article/48/W1/W193/5847772] for use this way.
+A: The data is available online at zenodo (10.5281/zenodo.2547383). You can also access predicted REM-gene associations and other information through the [Epiregio database](https://epiregio.de). Please cite [Baumgarten et al. 2020](https://academic.oup.com/nar/article/48/W1/W193/5847772) for use this way.
 
 
 Q: How should I cite STITCHIT?
 
-A: Please cite our NAR article (Schmidt et al., 2021) [10.1093/nar/gkab798](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab798/6368526).
+A: Please cite our NAR article [Schmidt et al., 2021](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab798/6368526).
    
 
 
