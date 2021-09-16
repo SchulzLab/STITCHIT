@@ -92,13 +92,14 @@ The file must be sorted according to the geneIDs.
  
 ## How to run the linear regression for REM filtering?
 
-A R script is provided to run a linear model to filter REMs generated with either the MDL formulation of STITCHIT, UnifiedPeaks or GeneHancer. The most basic command to execute the script *Two_level_learning.R* is
+An R script is provided to run a linear model to filter REMs generated with either the MDL formulation of STITCHIT, UnifiedPeaks or GeneHancer mode. The most basic command to execute the script *Two_level_learning.R* is
 
     Rscript Two_level_learning.R --dataDir <Data directory of regulatory elements> --outDir <Output directory that will be generated> --reponse <Name of the response variable> --cores <#CPUs>
 
 The script will learn a separate model for each gene for that segments are provided in the directory specified by *dataDir*. In the folder specified by *outDir* filtered segments will be stored. Similarly a performance overview file will be generated.
 
 Futher parameters are:
+	
         -outDir Output directory (will be created if it does not exist)
         -dataDir Directory containing the data
         -response Name of the response variable
