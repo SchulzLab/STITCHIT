@@ -90,6 +90,51 @@ Similarly to above we provide the possibility to give previously defined regions
 The new parameter here is *-k*, which provides the GeneHancer regions in bed file format <chr> <start> <end> <ENSGID>. 
 The file must be sorted according to the geneIDs.
  
+## How to run the linear regression for REM filtering?
+
+A R script is provided to run a linear model to filter REMs generated with either the MDL formulation of STITCHIT, UnifiedPeaks or GeneHancer. The most basic command to execute the script *Two_level_learning.R* is
+
+    Rscript Two_level_learning.R --dataDir <Data directory of regulatory elements> --outDir <Output directory that will be generated> --reponse <Name of the response variable> --cores <#CPUs>
+
+The script will learn a separate model for each gene for that segments are provided in the directory specified by *dataDir*. In the folder specified by *outDir* filtered segments will be stored. Similarly a performance overview file will be generated.
+
+Futher parameters are:
+        -outDir Output directory (will be created if it does not exist)
+        -dataDir Directory containing the data
+        -response Name of the response variable
+        -cores Number of cores to be use (default 1)
+        -fixedAlpha Use a fixed value for the alpha parameter in elastic net regulatisation, do not perform a grid search
+        -alpha Stepsize to optimise the alpha parameter in elastic net regularisation (default 0.05)
+        -testsize Size of test data[%] (default 0.2)
+        -regularisation L for Lasso, R for Ridge, and E for Elastic net (default E)
+        -innerCV Number of folds for inner cross-validation (default 6)
+        -outerCV Number of iterations of outer cross-validation to determine test error (default 3)
+        -constraint Specifies a constraint on the coefficent sign, enter N for negative and P for positive constraint
+        -performance Flag indiciating whether the performance of the model should be assessed (default TRUE)
+        -seed Random seed used for random number generation (default random)
+        -leaveOneOutCV Flag indicating whether a leave one out cross-validation should be used (default FALSE)
+        -asRData Store feature coefficients as RData files (default FALSE)
+        -randomise Randomise the feature matrix (default FALSE)
+        -logResponse Flag indicating whether the response variable should be log transformed (default TRUE)
+        -ftest Flag indicating whether partial F-test should be computed to assess the significance of each feature (default FALSE)
+        -coefP p-value threshold for model coefficient (default 1, all OLS coefs will be returned)
+
+The parameters *cores*, *innerCV*, *outerCV*, *ftest* and *alpha* will can considerably affect runtime.
+
+
+## How to run the Nested version of STITCHIT.
+
+As explained [here](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab798/6368526), a nested execution of STITCHIT avoids an overestimation of model performance. As this nested execution is more challenging, we provide a python script to manage the workflow: *NestedSTITCHIT.py*.
+Note that this script exclusively works with STICHIT, not UnifiedPeaks or GeneHancer.
+
+The script needs to be executed for each gene of interest as:
+
+    python NestedSTITCHIT.py <Normalised BigWig files> <Gene Annotation> <Discretised Expression Data> <Original expression data> <OutputFolder> <Size File> <geneID> <#Folds>  <Folder for R output>
+
+For each gene, <#Folds> times STITCHIT will be executed on a randomly selected set of samples (Monte Carlo Cross validation) and a linear model will be learned for each subset and evaluated on hold out data not used for feature generation. Note that using the nested execution is very resource and time-intensive.
+	
+	
+	
 ## FAQ
 Q: I can not compile STITCHIT on my Mac! What is wrong?
 
@@ -103,7 +148,9 @@ A: The data is available online at zenodo (10.5281/zenodo.2547383)
 
 Q: How should I cite STITCHIT?
 
-A: You can cite our bioRxiv article: [doi.org/10.1101/585125](https://www.biorxiv.org/content/10.1101/585125v1.full)
+A: Please cite our NAR article (Schmidt et al., 2021) [10.1093/nar/gkab798](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab798/6368526).
+   You can find predicted REM-gene associations in the (Epiregio database) [https://epiregio.de]. Please cite (Baumgarten et al. 2020)[https://academic.oup.com/nar/article/48/W1/W193/5847772] for use this way.
+
 
 
 ## Acknowledgements
