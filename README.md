@@ -100,25 +100,25 @@ The script will learn a separate model for each gene for that segments are provi
 
 Futher parameters are:
 	
-        -outDir Output directory (will be created if it does not exist)
-        -dataDir Directory containing the data
-        -response Name of the response variable
-        -cores Number of cores to be use (default 1)
-        -fixedAlpha Use a fixed value for the alpha parameter in elastic net regulatisation, do not perform a grid search
-        -alpha Stepsize to optimise the alpha parameter in elastic net regularisation (default 0.05)
-        -testsize Size of test data[%] (default 0.2)
-        -regularisation L for Lasso, R for Ridge, and E for Elastic net (default E)
-        -innerCV Number of folds for inner cross-validation (default 6)
-        -outerCV Number of iterations of outer cross-validation to determine test error (default 3)
-        -constraint Specifies a constraint on the coefficent sign, enter N for negative and P for positive constraint
-        -performance Flag indiciating whether the performance of the model should be assessed (default TRUE)
-        -seed Random seed used for random number generation (default random)
-        -leaveOneOutCV Flag indicating whether a leave one out cross-validation should be used (default FALSE)
-        -asRData Store feature coefficients as RData files (default FALSE)
-        -randomise Randomise the feature matrix (default FALSE)
-        -logResponse Flag indicating whether the response variable should be log transformed (default TRUE)
-        -ftest Flag indicating whether partial F-test should be computed to assess the significance of each feature (default FALSE)
-        -coefP p-value threshold for model coefficient (default 1, all OLS coefs will be returned)
+        - outDir Output directory (will be created if it does not exist)
+        - dataDir Directory containing the data
+        - response Name of the response variable
+        - cores Number of cores to be use (default 1)
+        - fixedAlpha Use a fixed value for the alpha parameter in elastic net regulatisation, do not perform a grid search
+        - alpha Stepsize to optimise the alpha parameter in elastic net regularisation (default 0.05)
+        - testsize Size of test data[%] (default 0.2)
+        - regularisation L for Lasso, R for Ridge, and E for Elastic net (default E)
+        - innerCV Number of folds for inner cross-validation (default 6)
+        - outerCV Number of iterations of outer cross-validation to determine test error (default 3)
+        - constraint Specifies a constraint on the coefficent sign, enter N for negative and P for positive constraint
+        - performance Flag indiciating whether the performance of the model should be assessed (default TRUE)
+        - seed Random seed used for random number generation (default random)
+        - leaveOneOutCV Flag indicating whether a leave one out cross-validation should be used (default FALSE)
+        - asRData Store feature coefficients as RData files (default FALSE)
+        - randomise Randomise the feature matrix (default FALSE)
+        - logResponse Flag indicating whether the response variable should be log transformed (default TRUE)
+        - ftest Flag indicating whether partial F-test should be computed to assess the significance of each feature (default FALSE)
+        - coefP p-value threshold for model coefficient (default 1, all OLS coefs will be returned)
 
 The parameters *cores*, *innerCV*, *outerCV*, *ftest* and *alpha* will can considerably affect runtime.
 
