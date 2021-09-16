@@ -98,7 +98,7 @@ An R script is provided to run a linear model to filter REMs generated with eith
 
 The script will learn a separate model for each gene for that segments are provided in the directory specified by *dataDir*. In the folder specified by *outDir* filtered segments will be stored. Similarly a performance overview file will be generated.
 
-Futher parameters are:
+Further parameters are:
 	
         - outDir Output directory (will be created if it does not exist)
         - dataDir Directory containing the data
@@ -120,19 +120,19 @@ Futher parameters are:
         - ftest Flag indicating whether partial F-test should be computed to assess the significance of each feature (default FALSE)
         - coefP p-value threshold for model coefficient (default 1, all OLS coefs will be returned)
 
-The parameters *cores*, *innerCV*, *outerCV*, *ftest* and *alpha* will can considerably affect runtime.
+The parameters *cores*, *innerCV*, *outerCV*, *ftest* and *alpha* can considerably affect runtime.
 
 
-## How to run the Nested version of STITCHIT.
+## How to run the Nested version of STITCHIT?
 
-As explained [here](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab798/6368526), a nested execution of STITCHIT avoids an overestimation of model performance. As this nested execution is more challenging, we provide a python script to manage the workflow: *NestedSTITCHIT.py*.
+As explained [here](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab798/6368526), a nested execution of STITCHIT enables out-of-sample performance estimates. As this nested execution is more computationally involved, we provide a python script to manage the workflow: *NestedSTITCHIT.py*.
 Note that this script exclusively works with STICHIT, not UnifiedPeaks or GeneHancer.
 
 The script needs to be executed for each gene of interest as:
 
     python NestedSTITCHIT.py <Normalised BigWig files> <Gene Annotation> <Discretised Expression Data> <Original expression data> <OutputFolder> <Size File> <geneID> <#Folds>  <Folder for R output>
 
-For each gene, <#Folds> times STITCHIT will be executed on a randomly selected set of samples (Monte Carlo Cross validation) and a linear model will be learned for each subset and evaluated on hold out data not used for feature generation. Note that using the nested execution is very resource and time-intensive.
+For each gene STITCHIT will be executed <#Folds> times on a randomly selected set of samples (Monte Carlo Cross validation) and a linear model will be learned for each subset and evaluated on hold out data not used for feature generation. Note that using the nested execution is very resource and time-intensive.
 	
 	
 	
@@ -144,15 +144,15 @@ A: Make sure that the symbolic links of your compilers are set properly. We have
 
 Q: Where can I get the data from the manuscript?
 
-A: The data is available online at zenodo (10.5281/zenodo.2547383)
+A: The data is available online at zenodo (10.5281/zenodo.2547383). You can also access predicted REM-gene associations and other information through the (Epiregio database) [https://epiregio.de]. Please cite (Baumgarten et al. 2020)[https://academic.oup.com/nar/article/48/W1/W193/5847772] for use this way.
 
 
 Q: How should I cite STITCHIT?
 
 A: Please cite our NAR article (Schmidt et al., 2021) [10.1093/nar/gkab798](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab798/6368526).
-   You can find predicted REM-gene associations in the (Epiregio database) [https://epiregio.de]. Please cite (Baumgarten et al. 2020)[https://academic.oup.com/nar/article/48/W1/W193/5847772] for use this way.
+   
 
 
 
 ## Acknowledgements
-This project is being funded by the Bundesministerium für Bildung und Forschung (BMBF) with project number 01DP17005 under the acronym EPIREG.
+This project has been funded by the Bundesministerium für Bildung und Forschung (BMBF) with project number 01DP17005 under the acronym EPIREG and the German Center for Cardiovascular Research (DZHK).
